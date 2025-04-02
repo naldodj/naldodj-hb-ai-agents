@@ -32,6 +32,9 @@ Os arquivos do projeto estão organizados em três categorias principais:
 2. **Instalação**: Clone o repositório para sua máquina:
    ```bash
    git clone https://github.com/naldodj/naldodj-hb-ai-agents.git
+   cd ./naldodj-hb-ai-agents/src/tst
+   hbmk2.exe hb_agents.hbp
+   ./hb_agents
    ```
 3. **Compilação**: Compile os arquivos `.prg` usando o compilador Harbour.
 4. **Exemplos de Uso**:
