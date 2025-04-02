@@ -1,5 +1,7 @@
 # naldodj-hb-ai-agents
 
+![AutonomosAgents](https://github.com/user-attachments/assets/53ff7ee2-fbb5-48ca-8c0f-2d7150281fe3)
+
 Bem-vindo ao **naldodj-hb-ai-agents**, um framework para desenvolver agentes de inteligência artificial autônomos utilizando a linguagem Harbour. Este projeto oferece uma estrutura modular para criar e gerenciar agentes de IA, com suporte a tarefas como operações no sistema de arquivos, cálculos matemáticos e consultas de tempo. Ideal para desenvolvedores que trabalham com sistemas xBase e desejam implementar automações inteligentes.
 
 ## Descrição do Projeto
