@@ -33,8 +33,10 @@ Os arquivos do projeto estão organizados em três categorias principais:
    ```bash
    git clone https://github.com/naldodj/naldodj-hb-ai-agents.git
    cd ./naldodj-hb-ai-agents/src/tst
-   hbmk2.exe hb_agents.hbp
-   ./hb_agents
+   hbmk2.exe hb_agents_ollama.hbp
+   ./hb_agents_ollama
+   hbmk2.exe hb_agents_lmstudio.hbp
+   ./hb_agents_lmstudio
    ```
 3. **Compilação**: Compile os arquivos `.prg` usando o compilador Harbour.
 4. **Exemplos de Uso**:
