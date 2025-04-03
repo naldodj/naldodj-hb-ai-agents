@@ -37,81 +37,150 @@ procedure Main()
 
 static procedure Execute()
 
+    local cPrompt as character
     local cResponse as character
 
     local hResponse as hash
 
-    local oAgent as object
-    local oLLama as object
+    local oTAgent as object
+    local oTOLLama as object
 
-    oLLama:=ToLLama():New()
+    oTOLLama:=TOLLama():New()
 
     // Agent for showing the time
-    oAgent:=Agent_Time():Execute("GetAgents")
-    aAdd(oLLama:aAgents,oAgent)
+    oTAgent:=Agent_DateTime():Execute("GetAgents")
+    aAdd(oTOLLama:aAgents,oTAgent)
 
     // Agent for filesystem with multiple tools
-    oAgent:=Agent_Filesystem():Execute("GetAgents")
-    aAdd(oLLama:aAgents,oAgent)
+    oTAgent:=Agent_Filesystem():Execute("GetAgents")
+    aAdd(oTOLLama:aAgents,oTAgent)
 
     // Agent for math calculations
-    oAgent:=Agent_Math():Execute("GetAgents")
-    aAdd(oLLama:aAgents,oAgent)
+    oTAgent:=Agent_Math():Execute("GetAgents")
+    aAdd(oTOLLama:aAgents,oTAgent)
 
+    cPrompt:="What the current 'time' is it?"
     #ifdef DEBUG
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
-        ? "'What time is it?'",hb_eol()
+        ? cPrompt,hb_eol()
     #endif
-    oLLama:Send("What time is it?")
+    oTOLLama:Send(cPrompt)
 
+    cPrompt:="What 'date' is Today?"
     #ifdef DEBUG
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
-        ? "'Create a folder named test'",hb_eol()
+        ? cPrompt,hb_eol()
     #endif
-    oLLama:Send("Create a folder named 'test'")
+    oTOLLama:Send(cPrompt)
 
+    cPrompt:="What the current 'date and time' is it?"
     #ifdef DEBUG
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
-        ? "'Create a file called test.txt'",hb_eol()
+        ? cPrompt,hb_eol()
     #endif
-    oLLama:Send("Create a file called 'test.txt'")
+    oTOLLama:Send(cPrompt)
 
+    cPrompt:="Create a folder named 'test'"
     #ifdef DEBUG
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
-        ? "'Modify the file test.txt with content Hello World'",hb_eol()
+        ? cPrompt,hb_eol()
     #endif
-    oLLama:Send("Modify the file test.txt with content Hello World")
+    oTOLLama:Send(cPrompt)
 
+    cPrompt:="Create a file called 'test.txt'"
     #ifdef DEBUG
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
-        ? "'Delete the file test.txt'",hb_eol()
+        ? cPrompt,hb_eol()
     #endif
-    oLLama:Send("Delete the file 'test.txt'")
+    oTOLLama:Send(cPrompt)
 
+    cPrompt:="Modify the file 'test.txt' with content 'Hello World'"
     #ifdef DEBUG
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
-        ? "'What is 2 + 2?'",hb_eol()
+        ? cPrompt,hb_eol()
     #endif
-    oLLama:Send("What is 2 + 2?")
+    oTOLLama:Send(cPrompt)
 
+    cPrompt:="Delete the file 'test.txt'"
     #ifdef DEBUG
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
-        ? "'What’s the weather like?'",hb_eol()
+        ? cPrompt,hb_eol()
     #endif
-    cResponse:=oLLama:Send("What's the weather like?")
+    oTOLLama:Send(cPrompt)
+
+    cPrompt:="What is 2 + 2?"
+    #ifdef DEBUG
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+    #endif
+    oTOLLama:Send(cPrompt)
+
+    cPrompt:="What is 2 - 2?"
+    #ifdef DEBUG
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+    #endif
+    oTOLLama:Send(cPrompt)
+
+    cPrompt:="What is 2 x 2?"
+    #ifdef DEBUG
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+    #endif
+    oTOLLama:Send(cPrompt)
+
+    cPrompt:="What is 2 / 2?"
+    #ifdef DEBUG
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+    #endif
+    oTOLLama:Send(cPrompt)
+
+    cPrompt:="What is (2 ^ 2)^2?"
+    #ifdef DEBUG
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+    #endif
+    oTOLLama:Send(cPrompt)
+
+    cPrompt:="What's the weather like?"
+    #ifdef DEBUG
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+    #endif
+    cResponse:=oTOLLama:Send(cPrompt)
     hb_JSONDecode(cResponse,@hResponse)
     if valType(hResponse)=="H".and.hb_HhasKey(hResponse,"message").and.hb_HhasKey(hResponse["message"],"content")
         DispOut("DEBUG: result: ","GR+/n")
         ? hResponse["message"]["content"]
     endif
 
-    oLLama:End()
+    cPrompt:="What is Dom Pedro II's full name?"
+    #ifdef DEBUG
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+    #endif
+    cResponse:=oTOLLama:Send(cPrompt)
+    hb_JSONDecode(cResponse,@hResponse)
+    if valType(hResponse)=="H".and.hb_HhasKey(hResponse,"message").and.hb_HhasKey(hResponse["message"],"content")
+        DispOut("DEBUG: result: ","GR+/n")
+        ? hResponse["message"]["content"]
+    endif
+
+    oTOLLama:End()
 
     return

@@ -3,6 +3,19 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-03 01:27 UTC naldodj
+  + src/tst/agent_datetime.prg
+  + src/agents/agent_datetime.prg
+  - src/agents/agent_time.prg
+  - src/tst/agent_time.prg
+  * src/agents/agent_math.prg
+  * src/tst/hb_agents.exe
+  * src/tst/hb_agents.hbp
+  * src/agents/agent_filesystem.prg
+  * src/core/tagent.prg
+  * src/core/tollama.prg
+  * src/tst/hb_agents.prg
+
 2025-04-02 21:59 UTC naldodj
   * src/tst/hb_agents.exe
   * src/core/tollama.prg

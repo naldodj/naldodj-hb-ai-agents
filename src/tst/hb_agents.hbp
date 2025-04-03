@@ -13,7 +13,7 @@
 
 ../agents/agent_filesystem.prg
 ../agents/agent_math.prg
-../agents/agent_time.prg
+../agents/agent_datetime.prg
 
 ./hb_agents.prg
 

@@ -3,7 +3,7 @@
 | |_   __ _   __ _   ___  _ __  | |_
 | __| / _` | / _` | / _ \| '_ \ | __|
 | |_ | (_| || (_| ||  __/| | | || |_
- \__| \__,_| \__, | \___||_| |_| \__|
+ \__| \__,_| \__,| \___||_| |_| \__|
              |___/
 
 Ref.: FiveTech Software tech support forums
@@ -16,12 +16,15 @@ Released to Public Domain.
 #include "hbclass.ch"
 
 CLASS TAgent
+    DATA cMessage
     DATA cCategory
     DATA aTools
-    METHOD New( cCategory, aTools )
+    METHOD New(cCategory,aTools,cMessage)
 ENDCLASS
 
-METHOD New( cCategory, aTools ) CLASS TAgent
+METHOD New(cCategory,aTools,cMessage) CLASS TAgent
     ::cCategory:=cCategory
     ::aTools:=aTools
+    hb_default(@cMessage,"")
+    ::cMessage:=cMessage
 return Self

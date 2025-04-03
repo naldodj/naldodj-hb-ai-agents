@@ -20,21 +20,38 @@ HB_NAMESPACE Agent_Math METHOD "GetAgents" POINTER @GetAgents(),;
 
 static function GetAgents()
 
-    local oAgent as object
+    local oTAgent as object
 
-    oAgent:=TAgent():New(;
+    local cMessage as character
+
+    #pragma __cstream|cMessage:=%s
+Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
+select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
+Analyze the prompt and choose the tool that best matches its intent:
+Return a JSON object with 'tool' (the tool name) and 'params' (an empty hash, as no parameters are required).
+Examples:
+- For "What is 2 + 2?": {"tool":"evaluate","params":{"expression":"2+2"}}
+- For "What is 2 * 2?": {"tool":"evaluate","params":{"expression":"2*2"}}
+- For "What is 2 x 2?": {"tool":"evaluate","params":{"expression":"2*2"}}
+- For "What is 2 / 2?": {"tool":"evaluate","params":{"expression":"2/2"}}
+- For "What is 2 - 2?": {"tool":"evaluate","params":{"expression":"2-2"}}
+- For "What is 2 ^ 2?": {"tool":"evaluate","params":{"expression":"2^2"}}
+    #pragma __endtext
+
+    oTAgent:=TAgent():New(;
         "agent_math";
         ,{;
              {"evaluate",{|hParams|Agent_Math():Execute("EvaluateExpression",hParams)},{"params" => ["expression"]}};
         };
-    )
+        ,cMessage;
+   )
 
-    return(oAgent)
+    return(oTAgent)
 
 static function EvaluateExpression(hParams as hash)
     local cExpression as character
-    if hb_HHasKey( hParams, "expression" ) .and. ! Empty( hParams[ "expression" ] )
-        cExpression:=hParams[ "expression" ]
-        return "The result of " + cExpression + " is " + hb_NToC( &cExpression )
+    if hb_HHasKey(hParams, "expression") .and. !Empty(hParams["expression"])
+        cExpression:=hb_StrReplace(hParams["expression"],{"x"=>"*","X"=>"*"})
+        return "The result of " + cExpression + " is " + hb_NToC(&cExpression)
     endif
     return "Failed to evaluate expression: no expression specified"
