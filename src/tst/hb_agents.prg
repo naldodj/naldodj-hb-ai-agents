@@ -108,6 +108,7 @@ static procedure Execute()
     cResponse:=oLLama:Send("What's the weather like?")
     hb_JSONDecode(cResponse,@hResponse)
     if valType(hResponse)=="H".and.hb_HhasKey(hResponse,"message").and.hb_HhasKey(hResponse["message"],"content")
+        DispOut("DEBUG: result: ","GR+/n")
         ? hResponse["message"]["content"]
     endif
 

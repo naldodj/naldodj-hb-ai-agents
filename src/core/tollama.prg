@@ -119,7 +119,7 @@ METHOD GetToolName( cPrompt, oAgent ) CLASS TOLLama
 Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
 select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
 where each tool has specific parameter names defined (e.g., "create_folder" expects "folder_name", "modify_file" expects "file_name" and "content", "get_time" expects no parameters).
-Extract the relevant values from the prompt and map them to the exact parameter names required by the selected tool, as specified in the tool's definition.
+Extract the relevant values from the prompt and map them to the exact parameter names required by the selected tool, as specified in the tool`s definition.
 Do not use a generic "params" key; instead, use only the defined parameter names.
 Return a JSON object with 'tool' (the tool name) and 'params' (a hash with the exact parameter names and their values from the prompt, or an empty hash if no parameters are required).
 Examples:
@@ -127,7 +127,7 @@ Examples:
 - For "Modify test.txt with content Hello World": {"tool":"modify_file","params":{"file_name":"test.txt","content":"Hello World"}}
 - For "What time is it?": {"tool":"get_time","params":{}}.
 #pragma __endtext
-#pragma __endtext
+
     hMessage[ "content" ]:=hb_StrReplace(;
         hMessage[ "content" ];
         ,{;
