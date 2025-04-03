@@ -36,7 +36,8 @@ Analyze the prompt and choose the tool that best matches its intent:
 - Use "get_current_time" if the prompt asks only for the time (e.g., contains "time" but not "date"),
 - Use "get_current_date" if the prompt asks only for the date (e.g., contains "date" but not "time"),
 - Use "get_current_date_time" if the prompt asks for both date and time (e.g., contains "date and time" or similar).
-Return a JSON object with 'tool' (the tool name) and 'params' (an empty hash, as no parameters are required).
+Return a JSON object with 'tool' (the tool name) and 'params'.
+Provide only a JSON object containing 'tool' (the tool name) and 'params' (an empty object, as no parameters are required), with no additional text or explanation.
 Examples:
 - For "What time is it?": {"tool":"get_current_time","params":{}}
 - For "What the current time is it?": {"tool":"get_current_time","params":{}}

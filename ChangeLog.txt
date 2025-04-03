@@ -3,6 +3,20 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-03 10:02 UTC naldodj (tlmstudio)
+  + src/core/tlmstudio.prg
+  + src/tst/hb_agents_lmstudio.exe
+  + src/tst/hb_agents_lmstudio.hbp
+  + src/tst/hb_agents_lmstudio.prg
+  + src/tst/tlmstudio.prg
+  * src/agents/agent_datetime.prg
+  * src/agents/agent_filesystem.prg
+  * src/agents/agent_math.prg
+  * src/core/tollama.prg
+  * src/tst/hb_agents.exe -> src/tst/hb_agents_ollama.exe
+  * src/tst/hb_agents.hbp -> src/tst/hb_agents_ollama.hbp
+  * src/tst/hb_agents.prg -> src/tst/hb_agents_ollama.prg
+
 2025-04-03 01:27 UTC naldodj
   + src/tst/agent_datetime.prg
   + src/agents/agent_datetime.prg

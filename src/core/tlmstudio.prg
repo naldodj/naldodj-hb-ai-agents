@@ -1,11 +1,11 @@
 /*
- _           _  _
-| |_   ___  | || |  __ _  _ __ ___    __ _
-| __| / _ \ | || | / _` || '_ ` _ \  / _` |
-| |_ | (_) || || || (_| || | | | | || (_| |
- \__| \___/ |_||_| \__,_||_| |_| |_| \__,_|
+ _    _                  _               _  _
+| |_ | | _ __ ___   ___ | |_  _   _   __| |(_)  ___
+| __|| || '_ ` _ \ / __|| __|| | | | / _` || | / _ \
+| |_ | || | | | | |\__ \| |_ | |_| || (_| || || (_) |
+ \__||_||_| |_| |_||___/ \__| \__,_| \__,_||_| \___/
 
-Class TOllama with Agents!
+Class TLMStudio with Agents!
 
 Ref.: FiveTech Software tech support forums
 https://forums.fivetechsupport.com/viewtopic.php?t=45590&fbclid=IwY2xjawJabspleHRuA2FlbQIxMQABHfr9ZnmiZDE_sf1ZHzer4gx9RbwfpOb1xNSCqMlZuCmoEf4erO3UrABH9g_aem_IritY9uodOibezq_rQ8i1g
@@ -18,7 +18,7 @@ Released to Public Domain.
 #include "hbclass.ch"
 #include "hbcompat.ch"
 
-CLASS TOLLama
+CLASS TLMStudio
 
     DATA   cModel
     DATA   cPrompt
@@ -34,19 +34,19 @@ CLASS TOLLama
     METHOD GetPromptCategory(cPrompt)
     METHOD GetToolName(cPrompt,oTAgent)
     METHOD End()
-    METHOD GetValue()
+    METHOD GetValue(cHKey)
 
 ENDCLASS
 
-METHOD New(cModel) CLASS TOLLama
-    hb_default(@cModel,"gemma3")
+METHOD New(cModel) CLASS TLMStudio
+    hb_default(@cModel,"qwen2.5-7b-instruct-1m")
     ::cModel:=cModel
-    ::cUrl:="http://localhost:11434/api/chat"
+    ::cUrl:="http://127.0.0.1:1234/v1/chat/completions"
     ::hCurl:=curl_easy_init()
     ::aAgents:={}
 return Self
 
-METHOD GetPromptCategory(cPrompt) CLASS TOLLama
+METHOD GetPromptCategory(cPrompt) CLASS TLMStudio
 
     local cJson,hRequest:={ => },hMessage:={ => }
     local cCategoryResponse,hResponse
@@ -83,9 +83,9 @@ METHOD GetPromptCategory(cPrompt) CLASS TOLLama
         hb_jsonDecode(cCategoryResponse,@hResponse)
         #ifdef DEBUG
             DispOut("DEBUG: Category returned by AI: ","g+/n")
-            ? hResponse["message"]["content"],hb_eol()
+            ? hResponse["choices"][1]["message"]["content"],hb_eol()
         #endif
-        return hResponse["message"]["content"]
+        return hResponse["choices"][1]["message"]["content"]
     endif
     #ifdef DEBUG
         DispOut("DEBUG: ","r+/n")
@@ -93,7 +93,7 @@ METHOD GetPromptCategory(cPrompt) CLASS TOLLama
     #endif
 return nil
 
-METHOD GetToolName(cPrompt,oTAgent) CLASS TOLLama
+METHOD GetToolName(cPrompt,oTAgent) CLASS TLMStudio
 
     local cJson,cMessage,hRequest:={ => },hMessage:={ => }
     local cToolResponse,hResponse,hToolInfo
@@ -160,11 +160,11 @@ Examples:
             ? cToolResponse,hb_eol()
             DispOut("DEBUG: hResponse after decoding: ","g+/n")
             ? hb_jsonEncode(hResponse),hb_eol()
-            DispOut("DEBUG: Content of hResponse['message']['content']:","g+/n")
-            ? hResponse["message"]["content"],hb_eol()
+            DispOut("DEBUG: Content of hResponse['choices'][1]['message']['content']:","g+/n")
+            ? hResponse["choices"][1]["message"]["content"],hb_eol()
         #endif
-        hResponse["message"]["content"]:=hb_StrReplace(hResponse["message"]["content"],{"```json"=>"","```"=>""})
-        hb_jsonDecode(hResponse["message"]["content"],@hToolInfo)
+        hResponse["choices"][1]["message"]["content"]:=hb_StrReplace(hResponse["choices"][1]["message"]["content"],{"```json"=>"","```"=>""})
+        hb_jsonDecode(hResponse["choices"][1]["message"]["content"],@hToolInfo)
         #ifdef DEBUG
             DispOut("DEBUG: hToolInfo after processing:","g+/n")
             ? hb_jsonEncode(hToolInfo),hb_eol()
@@ -183,7 +183,7 @@ Examples:
     #endif
 return nil
 
-METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TOLLama
+METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TLMStudio
 
     local aHeaders,cJson,hRequest:={ => },hMessage:={ => }
     local cBase64Image
@@ -340,19 +340,39 @@ METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TOLLama
     else
         ::cResponse:="Error code " + Str(::nError)
     endif
+
 return ::cResponse
 
-METHOD End() CLASS TOLLama
+METHOD End() CLASS TLMStudio
     curl_easy_cleanup(::hCurl)
     ::hCurl:=nil
 return nil
 
-METHOD GetValue() CLASS TOLLama
-    local hResponse,uValue
-    hb_jsonDecode(::cResponse,@hResponse)
+METHOD GetValue(cHKey) CLASS TLMStudio
+    local aKeys as array:=hb_AParams()
+    local cKey as character
+    local uValue:=hb_JSONDecode(::cResponse)
+    hb_default(@cHKey,"content")
+    if (cHKey=="content")
+        TRY
+            uValue:=uValue["choices"][1]["message"]["content"]
+        CATCH
+            TRY
+                uValue:=uValue["error"]["message"]
+            CATCH
+                uValue:=uValue
+            END
+        END
+    endif
     TRY
-        uValue:=hResponse["message"]["content"]
+        for each cKey in aKeys
+            if (ValType(uValue[cKey])=="A")
+                uValue:=uValue[cKey][1]["choices"][1]["message"]["content"]
+            else
+                uValue:=uValue[cKey]
+            endif
+        next
     CATCH
-        uValue:=hResponse["error"]["message"]
+        //...
     END
-return uValue
+    return(uValue)

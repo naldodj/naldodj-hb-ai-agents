@@ -33,6 +33,7 @@ where each tool has specific parameter names defined (e.g., "create_folder" expe
 Extract the relevant values from the prompt and map them to the exact parameter names required by the selected tool, as specified in the tool`s definition.
 Do not use a generic "params" key; instead, use only the defined parameter names.
 Return a JSON object with 'tool' (the tool name) and 'params' (a hash with the exact parameter names and their values from the prompt, or an empty hash if no parameters are required).
+Provide only a JSON object containing 'tool' (the tool name) and 'params' (an empty object, as no parameters are required), with no additional text or explanation.
 Examples:
 - For "Create a folder named 'folderName'": {"tool":"create_folder","params":{"folder_name":"folderName"}}
 - For "Create a file named 'fileName'": {"tool":"create_file","params":{"file_name":"fileName"}}

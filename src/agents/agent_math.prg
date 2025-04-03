@@ -28,7 +28,8 @@ static function GetAgents()
 Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
 select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
 Analyze the prompt and choose the tool that best matches its intent:
-Return a JSON object with 'tool' (the tool name) and 'params' (an empty hash, as no parameters are required).
+Return a JSON object with 'tool' (the tool name) and 'params'.
+Provide only a JSON object containing 'tool' (the tool name) and 'params' (an empty object, as no parameters are required), with no additional text or explanation.
 Examples:
 - For "What is 2 + 2?": {"tool":"evaluate","params":{"expression":"2+2"}}
 - For "What is 2 * 2?": {"tool":"evaluate","params":{"expression":"2*2"}}

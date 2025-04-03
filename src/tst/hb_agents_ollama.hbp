@@ -15,6 +15,6 @@
 ../agents/agent_math.prg
 ../agents/agent_datetime.prg
 
-./hb_agents.prg
+./hb_agents_ollama.prg
 
 -o./${hb_name}
