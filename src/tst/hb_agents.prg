@@ -21,8 +21,6 @@ REQUEST HB_CODEPAGE_UTF8EX
 procedure Main()
 
     local cCDP as character
-    local oAgent as object
-    local oLLama as object
 
     #ifdef __ALT_D__    // Compile with -b -D__ALT_D__
         AltD(1)         // Enables the debugger. Press F5 to continue.
@@ -30,6 +28,21 @@ procedure Main()
     #endif
 
     cCDP:=hb_cdpSelect("UTF8EX")
+
+    Execute()
+
+    hb_cdpSelect(cCDP)
+
+    return
+
+static procedure Execute()
+
+    local cResponse as character
+
+    local hResponse as hash
+
+    local oAgent as object
+    local oLLama as object
 
     oLLama:=ToLLama():New()
 
@@ -46,56 +59,58 @@ procedure Main()
     aAdd(oLLama:aAgents,oAgent)
 
     #ifdef DEBUG
-        ? Replicate("=",MaxCol())
-        ? "DEBUG: Testing "
-        DispOut("'What time is it?'","g+/n")
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? "'What time is it?'",hb_eol()
     #endif
     oLLama:Send("What time is it?")
 
     #ifdef DEBUG
-        ? Replicate("=",MaxCol())
-        ? "DEBUG: Testing "
-        DispOut("'Create a folder named test'","g+/n")
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? "'Create a folder named test'",hb_eol()
     #endif
     oLLama:Send("Create a folder named 'test'")
 
     #ifdef DEBUG
-        ? Replicate("=",MaxCol())
-        ? "DEBUG: Testing "
-        DispOut("'Create a file called test.txt'","g+/n")
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? "'Create a file called test.txt'",hb_eol()
     #endif
     oLLama:Send("Create a file called 'test.txt'")
 
     #ifdef DEBUG
-        ? Replicate("=",MaxCol())
-        ? "DEBUG: Testing "
-        DispOut("'Modify the file test.txt with content Hello World'","g+/n")
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? "'Modify the file test.txt with content Hello World'",hb_eol()
     #endif
     oLLama:Send("Modify the file test.txt with content Hello World")
 
     #ifdef DEBUG
-        ? Replicate("=",MaxCol())
-        ? "DEBUG: Testing "
-        DispOut("'Delete the file test.txt'","g+/n")
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? "'Delete the file test.txt'",hb_eol()
     #endif
     oLLama:Send("Delete the file 'test.txt'")
 
     #ifdef DEBUG
-        ? Replicate("=",MaxCol())
-        ? "DEBUG: Testing "
-        DispOut("'What is 2 + 2?'","g+/n")
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? "'What is 2 + 2?'",hb_eol()
     #endif
     oLLama:Send("What is 2 + 2?")
 
     #ifdef DEBUG
-        ? Replicate("=",MaxCol())
-        ? "DEBUG: Testing "
-        DispOut("'What’s the weather like?'","g+/n")
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? "'What’s the weather like?'",hb_eol()
     #endif
-    oLLama:Send("What's the weather like?")
+    cResponse:=oLLama:Send("What's the weather like?")
+    hb_JSONDecode(cResponse,@hResponse)
+    if valType(hResponse)=="H".and.hb_HhasKey(hResponse,"message").and.hb_HhasKey(hResponse["message"],"content")
+        ? hResponse["message"]["content"]
+    endif
 
     oLLama:End()
-
-    hb_cdpSelect(cCDP)
 
     return

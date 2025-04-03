@@ -20,12 +20,11 @@ HB_NAMESPACE Agent_Time METHOD "GetAgents" POINTER @GetAgents(),;
 static function GetAgents()
 
     local oAgent as object
-    //local oAgent_Time as object:=Agent_Time():New()
 
     oAgent:=TAgent():New(;
         "agent_time";
         ,{;
-             {"get_time",{|hParams| Agent_Time():Execute("GetCurrentTime",hParams)}};
+             {"get_time",{|hParams|Agent_Time():Execute("GetCurrentTime",hParams)},{"params"=>[""]}};
         };
     )
 

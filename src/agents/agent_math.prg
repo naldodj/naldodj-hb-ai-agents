@@ -21,12 +21,11 @@ HB_NAMESPACE Agent_Math METHOD "GetAgents" POINTER @GetAgents(),;
 static function GetAgents()
 
     local oAgent as object
-    //local oAgent_Math as object:=Agent_Math():New()
 
     oAgent:=TAgent():New(;
         "agent_math";
         ,{;
-             {"evaluate",{|hParams| Agent_Math():Execute("EvaluateExpression",hParams)}};
+             {"evaluate",{|hParams|Agent_Math():Execute("EvaluateExpression",hParams)},{"params" => ["expression"]}};
         };
     )
 
