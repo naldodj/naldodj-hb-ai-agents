@@ -6,7 +6,7 @@ Bem-vindo ao **naldodj-hb-ai-agents**, um framework para desenvolver agentes de 
 
 ## Descrição do Projeto
 
-O "naldodj-hb-ai-agents" é projetado para facilitar a criação de agentes de IA em Harbour. Ele inclui classes centrais como `TAgent` e `TOLlama`, além de agentes especializados para tarefas específicas. O framework é acompanhado por uma suite de testes para validação e exemplos práticos.
+O "naldodj-hb-ai-agents" é projetado para facilitar a criação de agentes de IA em Harbour. Ele inclui classes centrais como `TAgent`, `TOLlama` e `TLMStudio`, além de agentes especializados para tarefas específicas. O framework é acompanhado por uma suite de testes para validação e exemplos práticos.
 
 ## Componentes Principais
 
@@ -15,20 +15,24 @@ Os arquivos do projeto estão organizados em três categorias principais:
 ### Core Files
 - **[tagent.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/core/tagent.prg)**: Implementação da classe `TAgent`, base para a criação de agentes.
 - **[tollama.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/core/tollama.prg)**: Implementação da classe `TOLlama`, essencial para a gestão de agentes.
+- **[tlmstudio.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/core/tlmstudio.prg)**: Implementação da classe `TLMStudio`, essencial para a integração com o LMStudio.
 
 ### Agent Files
 - **[agent_filesystem.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/agents/agent_filesystem.prg)**: Agente para operações no sistema de arquivos (ex.: criar pastas, modificar arquivos).
 - **[agent_math.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/agents/agent_math.prg)**: Agente para cálculos matemáticos.
-- **[agent_time.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/agents/agent_time.prg)**: Agente para consultas relacionadas ao tempo (ex.: "Que horas são?").
+- **[agent_datetime.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/agents/agent_datetime.prg)**: Agente para consultas relacionadas a data e hora (ex.: "Que horas são?", "Qual a data de hoje?").
 
-### Test File
-- **[hb_agents.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/tst/hb_agents.prg)**: Suite de testes para demonstrar e validar o funcionamento do framework.
+### Test Files
+- **[hb_agents_ollama.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/tst/hb_agents_ollama.prg)**: Suite de testes para demonstrar e validar o funcionamento do framework com `TOLlama`.
+- **[hb_agents_lmstudio.prg](https://github.com/naldodj/naldodj-hb-ai-agents/blob/main/src/tst/hb_agents_lmstudio.prg)**: Suite de testes para demonstrar e validar o funcionamento do framework com `TLMStudio`.
 
 ## Como Usar
 
 1. **Pré-requisitos**:
    - Certifique-se de ter um compilador Harbour instalado em seu ambiente.
    - Instale o [Ollama](https://ollama.ai/) localmente, pois ele é necessário para executar os testes e utilizar a classe `TOLlama`.
+   - Instale o [LMStudio](https://lmstudio.ai/) como uma alternativa ao Ollama.
+
 2. **Instalação**: Clone o repositório para sua máquina:
    ```bash
    git clone https://github.com/naldodj/naldodj-hb-ai-agents.git
@@ -38,9 +42,15 @@ Os arquivos do projeto estão organizados em três categorias principais:
    hbmk2.exe hb_agents_lmstudio.hbp
    ./hb_agents_lmstudio
    ```
-3. **Compilação**: Compile os arquivos `.prg` usando o compilador Harbour.
-4. **Exemplos de Uso**:
-   - Perguntar "Que horas são?" (usando `agent_time.prg`).
+
+3. **Configuração do LMStudio**:
+   - Baixe e instale o [LMStudio](https://lmstudio.ai/).
+   - Certifique-se de que o LMStudio está rodando e configurado corretamente para responder às chamadas do framework.
+   
+4. **Compilação**: Compile os arquivos `.prg` usando o compilador Harbour.
+
+5. **Exemplos de Uso**:
+   - Perguntar "Que horas são?" ou "Qual a data de hoje?" (usando `agent_datetime.prg`).
    - Criar uma pasta chamada "test" (usando `agent_filesystem.prg`).
    - Modificar um arquivo com o conteúdo "Hello World" (usando `agent_filesystem.prg`).
 
