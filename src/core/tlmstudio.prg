@@ -39,7 +39,7 @@ CLASS TLMStudio
 ENDCLASS
 
 METHOD New(cModel) CLASS TLMStudio
-    hb_default(@cModel,"qwen2.5-7b-instruct-1m")
+    hb_default(@cModel,"gemma-3-4b-it"/*qwen2.5-7b-instruct-1m*/)
     ::cModel:=cModel
     ::cUrl:="http://127.0.0.1:1234/v1/chat/completions"
     ::hCurl:=curl_easy_init()
@@ -72,7 +72,8 @@ METHOD GetPromptCategory(cPrompt) CLASS TLMStudio
     hMessage["content"]:="Classify this prompt: '" + cPrompt + "' into one of these categories: " + cCategories + ". Respond with only the category name."
     hRequest["messages"]:={ hMessage }
     hRequest["stream"]:=.F.
-    hRequest["temperature"]:=0.5
+    hRequest["temperature"]:=0.7
+    hRequest["max_tokens"]:=-1
 
     cJson:=hb_jsonEncode(hRequest)
     curl_easy_setopt(::hCurl,HB_CURLOPT_POSTFIELDS,cJson)
