@@ -37,116 +37,123 @@ procedure Main()
 
 static procedure Execute()
 
+    local aBackAgents as array
+
     local cPrompt as character
     local cResponse as character
 
-    local oTAgent as object
-    local oTLMStudio as object
+    WITH OBJECT TLMStudio():New()
 
-    oTLMStudio:=TLMStudio():New()
+        // Agent for showing the time
+        :AddAgent(Agent_DateTime():Execute("GetAgents"))
 
-    // Agent for showing the time
-    oTAgent:=Agent_DateTime():Execute("GetAgents")
-    aAdd(oTLMStudio:aAgents,oTAgent)
+        // Agent for filesystem with multiple tools
+        :AddAgent(Agent_Filesystem():Execute("GetAgents"))
 
-    // Agent for filesystem with multiple tools
-    oTAgent:=Agent_Filesystem():Execute("GetAgents")
-    aAdd(oTLMStudio:aAgents,oTAgent)
+        // Agent for math calculations
+        :AddAgent(Agent_Math():Execute("GetAgents"))
 
-    // Agent for math calculations
-    oTAgent:=Agent_Math():Execute("GetAgents")
-    aAdd(oTLMStudio:aAgents,oTAgent)
+        cPrompt:="What the current 'time' is it?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What the current 'time' is it?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What 'date' is Today?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What 'date' is Today?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What the current 'date and time' is it?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What the current 'date and time' is it?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="Create a folder named 'test'"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="Create a folder named 'test'"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="Create a file called 'test.txt'"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="Create a file called 'test.txt'"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="Modify the file 'test.txt' with content 'Hello World'"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="Modify the file 'test.txt' with content 'Hello World'"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="Delete the file 'test.txt'"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="Delete the file 'test.txt'"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What is 2 + 2?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What is 2 + 2?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What is 2 - 2?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What is 2 - 2?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What is 2 x 2?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What is 2 x 2?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What is 2 / 2?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What is 2 / 2?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What is (2 ^ 2)^2?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
 
-    cPrompt:="What is (2 ^ 2)^2?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
+        cPrompt:="What's the weather like?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
+        cResponse:=:GetValue()
+        DispOut("DEBUG: result: ","GR+/n")
+        ? cResponse
 
-    cPrompt:="What's the weather like?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
-    cResponse:=oTLMStudio:GetValue()
-    DispOut("DEBUG: result: ","GR+/n")
-    ? cResponse
+        aBackAgents:=:aAgents
+        :End()
 
-    cPrompt:="What is Dom Pedro II's full name?"
-    ? Replicate("=",MaxCol()),hb_eol()
-    DispOut("DEBUG: Testing ","RB+/n")
-    ? cPrompt,hb_eol()
-    oTLMStudio:Send(cPrompt)
-    cResponse:=oTLMStudio:GetValue()
-    DispOut("DEBUG: result: ","GR+/n")
-    ? cResponse
+    END WITH
 
-    oTLMStudio:End()
+    WITH OBJECT TLMStudio():New("qwen2.5-7b-instruct-1m")
+
+        :aAgents:=aBackAgents
+
+        cPrompt:="What is Dom Pedro II's full name?"
+        ? Replicate("=",MaxCol()),hb_eol()
+        DispOut("DEBUG: Testing ","RB+/n")
+        ? cPrompt,hb_eol()
+        :Send(cPrompt)
+        cResponse:=:GetValue()
+        DispOut("DEBUG: result: ","GR+/n")
+        ? cResponse
+
+        :End()
+
+    END WITH
 
     return

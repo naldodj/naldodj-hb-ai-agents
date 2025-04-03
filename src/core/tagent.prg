@@ -16,15 +16,15 @@ Released to Public Domain.
 #include "hbclass.ch"
 
 CLASS TAgent
-    DATA cMessage
-    DATA cCategory
-    DATA aTools
-    METHOD New(cCategory,aTools,cMessage)
+    DATA cMessage as character
+    DATA cCategory as character
+    DATA aTools as array
+    METHOD New(cCategory as character,aTools as array,cMessage as character) as object
 ENDCLASS
 
-METHOD New(cCategory,aTools,cMessage) CLASS TAgent
+METHOD New(cCategory as character,aTools as array,cMessage as character) CLASS TAgent
     ::cCategory:=cCategory
     ::aTools:=aTools
     hb_default(@cMessage,"")
     ::cMessage:=cMessage
-return Self
+return(self) as object

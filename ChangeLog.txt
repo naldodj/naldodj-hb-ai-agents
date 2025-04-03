@@ -3,6 +3,15 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-03 13:27 UTC naldodj
+  * src/core/tagent.prg
+  * src/core/tlmstudio.prg
+  * src/core/tollama.prg
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_lmstudio.prg
+  * src/tst/hb_agents_ollama.exe
+  * src/tst/hb_agents_ollama.prg
+
 2025-04-03 11:21 UTC naldodj (change tlmstudio model from qwen2.5-7b-instruct-1m to gemma-3-4b-it)
   * src/tst/hb_agents_lmstudio.exe
   * src/core/tlmstudio.prg

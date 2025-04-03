@@ -20,14 +20,14 @@ Released to Public Domain.
 
 CLASS TLMStudio
 
-    DATA   cModel
-    DATA   cPrompt
-    DATA   cResponse
-    DATA   cUrl
-    DATA   hCurl
-    DATA   nError INIT 0
-    DATA   nHttpCode INIT 0
-    DATA   aAgents INIT {}
+    DATA cModel
+    DATA cPrompt
+    DATA cResponse
+    DATA cUrl
+    DATA hCurl
+    DATA nError INIT 0
+    DATA nHttpCode INIT 0
+    DATA aAgents INIT {}
 
     METHOD New(cModel)
     METHOD Send(cPrompt,cImageFileName,bWriteFunction)
@@ -35,6 +35,7 @@ CLASS TLMStudio
     METHOD GetToolName(cPrompt,oTAgent)
     METHOD End()
     METHOD GetValue(cHKey)
+    METHOD AddAgent(oTAgent)
 
 ENDCLASS
 
@@ -201,7 +202,7 @@ METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TLMStudio
             DispOut("DEBUG: Obtained category (uncleaned): ","g+/n")
             ? cCategory,hb_eol()
         #endif
-        cCategory:=AllTrim(StrTran(StrTran(cCategory,Chr(13),""),Chr(10),""))
+        cCategory:=allTrim(hb_StrReplace(cCategory,{Chr(13)=>"",Chr(10)=>""}))
         #ifdef DEBUG
             DispOut("DEBUG: Obtained category (cleaned): ","g+/n")
             ? cCategory,hb_eol()
@@ -212,7 +213,7 @@ METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TLMStudio
             else
                 oTAgent:=nil
                 for nI:=1 to Len(::aAgents)
-                    if Lower(AllTrim(::aAgents[nI]:cCategory)) == Lower(AllTrim(cCategory))
+                    if Lower(allTrim(::aAgents[nI]:cCategory)) == Lower(allTrim(cCategory))
                         oTAgent:=::aAgents[nI]
                         exit
                     endif
@@ -224,7 +225,7 @@ METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TLMStudio
                         ? hb_jsonEncode(hToolInfo),hb_eol()
                     #endif
                     if ValType(hToolInfo) == "H" .and. hb_HHasKey(hToolInfo,"tool")
-                        cToolName:=AllTrim(StrTran(StrTran(hToolInfo["tool"],Chr(13),""),Chr(10),""))
+                        cToolName:=allTrim(hb_StrReplace(hToolInfo["tool"],{Chr(13)=>"",Chr(10)=>""}))
                         #ifdef DEBUG
                             DispOut("DEBUG: Obtained tool (cleaned): ","g+/n")
                             ? cToolName,hb_eol()
@@ -232,7 +233,7 @@ METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TLMStudio
                             ? hb_jsonEncode(hToolInfo["params"]),hb_eol()
                         #endif
                         if !Empty(cToolName)
-                            nTool:=AScan(oTAgent:aTools,{|x| Lower(AllTrim(x[1])) == Lower(AllTrim(cToolName)) })
+                            nTool:=AScan(oTAgent:aTools,{|x| Lower(allTrim(x[1])) == Lower(allTrim(cToolName)) })
                             if nTool > 0
                                 cToolResult:=Eval(oTAgent:aTools[nTool][2],hToolInfo["params"])
                                 #ifdef DEBUG
@@ -292,7 +293,7 @@ METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TLMStudio
     endif
 
     #ifdef DEBUG
-        DispOut("DEBUG: Calling OLLama API","g+/n")
+        DispOut("DEBUG: Calling LMStudio API","g+/n")
         ? hb_eol()
     #endif
 
@@ -377,3 +378,7 @@ METHOD GetValue(cHKey) CLASS TLMStudio
         //...
     END
     return(uValue)
+
+METHOD AddAgent(oTAgent) CLASS TLMStudio
+    aAdd(self:aAgents,oTAgent)
+    return(self)
