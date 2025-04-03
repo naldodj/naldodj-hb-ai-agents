@@ -285,7 +285,9 @@ METHOD Send( cPrompt, cImageFileName, bWriteFunction ) CLASS TOLLama
 
     #ifdef DEBUG
         DispOut("DEBUG: Calling OLLama API","g+/n")
+        ? hb_eol()
     #endif
+
     curl_easy_reset( ::hCurl )
     curl_easy_setopt( ::hCurl, HB_CURLOPT_POST, .T. )
     curl_easy_setopt( ::hCurl, HB_CURLOPT_URL, ::cUrl )
