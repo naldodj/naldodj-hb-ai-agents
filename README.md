@@ -47,7 +47,7 @@ Os arquivos do projeto estão organizados em três categorias principais:
    - Baixe e instale o [LMStudio](https://lmstudio.ai/).
    - Certifique-se de que o LMStudio está rodando e configurado corretamente para responder às chamadas do framework.
    
-4. **Compilação**: Compile os arquivos `.hrb` usando o compilador Harbour.
+4. **Compilação**: Compile os arquivos `.hbp` usando o compilador Harbour.
 
 5. **Exemplos de Uso**:
    - Perguntar "Que horas são?" ou "Qual a data de hoje?" (usando `agent_datetime.prg`).
