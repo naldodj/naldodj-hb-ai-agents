@@ -53,8 +53,11 @@ METHOD New(cModel as character) CLASS TLMStudio
 
 METHOD GetPromptCategory(cPrompt as character) CLASS TLMStudio
 
+    local aCategories as array:=Array(0)
+
     local cJSON as character
     local cCategories as character
+    local cGeneralPurpose as character
     local cCategoryResponse as character
 
     local hMessage as hash:={=>}
@@ -63,10 +66,22 @@ METHOD GetPromptCategory(cPrompt as character) CLASS TLMStudio
 
     local nError as numeric
 
-    cCategories:="'general'"
     if (!Empty(self:hAgents))
-        hb_HEval(self:hAgents,{|k as character|cCategories+=",'"+k+"'"})
+        hb_HEval(self:hAgents,{|k as character|aAdd(aCategories,{"category_name"=>k,"category_purpose"=>self:hAgents[k]:cAgentPurpose})})
     endif
+
+    #pragma __cstream|cGeneralPurpose:=%s
+The "general" category is used when a given prompt does not clearly fit into any predefined categories. It serves as a broad classification for diverse inquiries that do not require specialized tools or domain-specific processing.
+This category is designed to handle a wide range of requests, including open-ended questions, conceptual discussions, or queries that span multiple topics. While responses in this category may not be as precise as those in specialized categories, the system will still attempt to provide the best possible answer based on the available information.
+If a prompt was mistakenly classified as "general," refining the wording to include more explicit references to a relevant category may improve categorization accuracy.
+    #pragma __endtext
+    aAdd(aCategories,{"category_name"=>"general","category_purpose"=>cGeneralPurpose})
+
+    cCategories:=hb_JSONEncode({"categories"=>aCategories},.T.)
+    #ifdef DEBUG
+*        DispOut("DEBUG: Category List: ","g+/n")
+*        ? cCategories,hb_eol()
+    #endif
 
     curl_easy_reset(self:phCurl)
     curl_easy_setopt(self:phCurl,HB_CURLOPT_POST,.T.)
@@ -78,7 +93,7 @@ METHOD GetPromptCategory(cPrompt as character) CLASS TLMStudio
 
     hRequest["model"]:=self:cModel
     hMessage["role"]:="user"
-    hMessage["content"]:="Classify this prompt: '"+cPrompt+"' into one of these categories: "+cCategories+". Respond with only the category name."
+    hMessage["content"]:="Classify this prompt: '"+cPrompt+"' into the most appropriate category from the following list: ```json"+cCategories+"```. If no specific category fits, return 'general'. Respond only with the category name."
     hRequest["messages"]:={hMessage}
     hRequest["stream"]:=.F.
     hRequest["temperature"]:=0.7
@@ -113,7 +128,7 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLMStudio
 
     local cKey as character
     local cJSON as character
-    local cMessage as character
+    local cAgentPrompt as character
     local cToolResponse as character
 
     local hTools as hash:={=>}
@@ -141,26 +156,10 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLMStudio
     hRequest["model"]:=self:cModel
     hMessage["role"]:="user"
 
-    if (Empty(oTAgent:cMessage))
-#pragma __cstream|cMessage:=%s
-Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
-select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
-where each tool has specific parameter names defined (e.g.,"create_folder" expects "folder_name","modify_file" expects "file_name" and "content","get_time" expects no parameters).
-Extract the relevant values from the prompt and map them to the exact parameter names required by the selected tool,as specified in the tool`s definition.
-Do not use a generic "params" key; instead,use only the defined parameter names.
-Return a JSON object with 'tool' (the tool name) and 'params' (a hash with the exact parameter names and their values from the prompt,or an empty hash if no parameters are required).
-Provide only a JSON object containing 'tool' (the tool name) and 'params' (an empty object, as no parameters are required), with no additional text or explanation.
-Examples:
-- For "Create a folder named 'folderName'": {"tool":"create_folder","params":{"folder_name":"folderName"}}
-- For "Modify 'fileName' with content 'fileContent'": {"tool":"modify_file","params":{"file_name":"fileName","content":"fileContent"}}
-- For "What time is it?": {"tool":"get_date_time","params":{}}.
-#pragma __endtext
-    else
-        cMessage:=oTAgent:cMessage
-    endif
+    cAgentPrompt:=oTAgent:cAgentPrompt
 
-    cMessage:=hb_StrReplace(;
-        cMessage;
+    cAgentPrompt:=hb_StrReplace(;
+        cAgentPrompt;
         ,{;
             "__PROMPT__"=>cPrompt;
             ,"__AGENT_CATEGORY__"=>oTAgent:cCategory;
@@ -168,7 +167,7 @@ Examples:
         };
     )
 
-    hMessage["content"]:=cMessage
+    hMessage["content"]:=cAgentPrompt
     hRequest["messages"]:={hMessage}
     hRequest["stream"]:=.F.
     hRequest["temperature"]:=0.5
@@ -347,6 +346,7 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
             endif
 
             cToolResult:=Eval(oTAgent:hTools[cToolName]["action"],hToolInfo["params"])
+            HB_SYMBOL_UNUSED(cToolResult)
             #ifdef DEBUG
                 DispOut("DEBUG: Tool result: ","GR+/n")
                 ? cToolResult,hb_eol()

@@ -1,9 +1,9 @@
 /*
-                            _       _    _
-  __ _   __ _   ___  _ __  | |_    | |_ (_) _ __ ___    ___
- / _` | / _` | / _ \| '_ \ | __|   | __|| || '_ ` _ \  / _ \
-| (_| || (_| ||  __/| | | || |_    | |_ | || | | | | ||  __/
- \__,_| \__, | \___||_| |_| \__|    \__||_||_| |_| |_| \___|
+                            _           _         _          _    _
+  __ _   __ _   ___  _ __  | |_      __| |  __ _ | |_   ___ | |_ (_) _ __ ___    ___
+ / _` | / _` | / _ \| '_ \ | __|    / _` | / _` || __| / _ \| __|| || '_ ` _ \  / _ \
+| (_| || (_| ||  __/| | | || |_    | (_| || (_| || |_ |  __/| |_ | || | | | | ||  __/
+ \__,_| \__, | \___||_| |_| \__|    \__,_| \__,_| \__| \___| \__||_||_| |_| |_| \___|
         |___/
 
 Ref.: FiveTech Software tech support forums
@@ -23,31 +23,43 @@ static function GetAgents()
 
     local oTAgent as object
 
-    local cMessage as character
+    local cAgentPrompt as character
+    local cAgentPurpose as character
 
-    #pragma __cstream|cMessage:=%s
-Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
-select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
-where:
-- "get_current_time" returns only the current time (e.g., "23:25:21"),
-- "get_current_date" returns only the current date (e.g., "2025-04-02"),
-- "get_current_date_time" returns both the current date and time (e.g., "2025-04-02 23:25:21").
-Analyze the prompt and choose the tool that best matches its intent:
-- Use "get_current_time" if the prompt asks only for the time (e.g., contains "time" but not "date"),
-- Use "get_current_date" if the prompt asks only for the date (e.g., contains "date" but not "time"),
-- Use "get_current_date_time" if the prompt asks for both date and time (e.g., contains "date and time" or similar).
-Return a JSON object with 'tool' (the tool name) and 'params'.
-Provide only a JSON object containing 'tool' (the tool name) and 'params' (an empty object, as no parameters are required), with no additional text or explanation.
-Examples:
-- For "What time is it?": {"tool":"get_current_time","params":{}}
-- For "What the current time is it?": {"tool":"get_current_time","params":{}}
-- For "What date is it?": {"tool":"get_current_date","params":{}}
-- For "What the current date is it?": {"tool":"get_current_date","params":{}}
-- For "What date and time is it?": {"tool":"get_current_date_time","params":{}}
-- For "What the current date and time is it?": {"tool":"get_current_date_time","params":{}}
+    #pragma __cstream|cAgentPrompt:=%s
+**Prompt:** Based on `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, select the best-matching tool from:
+```json
+__JSON_HTOOLS__
+```
+### Tool logic:
+- `"get_current_time"` → if prompt asks for time only (mentions "time" but not "date")
+- `"get_current_date"` → if prompt asks for date only (mentions "date" but not "time")
+- `"get_current_date_time"` → if prompt asks for both date and time
+### Output:
+Return only a JSON object:
+```json
+{"tool":"<tool_name>","params":{}}
+```
+### Examples:
+- "What time is it?" →
+  ```json
+  {"tool":"get_current_time","params":{}}
+  ```
+- "What date is it?" →
+  ```json
+  {"tool":"get_current_date","params":{}}
+  ```
+- "What date and time is it?" →
+  ```json
+  {"tool":"get_current_date_time","params":{}}
+  ```
     #pragma __endtext
 
-    oTAgent:=TAgent():New("agent_datetime",cMessage)
+    #pragma __cstream|cAgentPurpose:=%s
+The "agent_datetime" provides tools for retrieving the current date and time in various formats. It is designed to handle requests for the current time, date, or both, depending on the user's prompt.
+    #pragma __endtext
+
+    oTAgent:=TAgent():New("Agent_DateTime",cAgentPrompt,cAgentPurpose)
 
     oTAgent:aAddTool("get_current_time",{|hParams|Agent_DateTime():Execute("GetCurrentTime",hParams)})
     oTAgent:aAddTool("get_current_date",{|hParams|Agent_DateTime():Execute("GetCurrentDate",hParams)})
@@ -58,14 +70,14 @@ Examples:
 static function GetCurrentTime(hParams as hash)
     local cTime as character:=Time()
     HB_SYMBOL_UNUSED(hParams)
-    return "The current time is " + cTime
+    return("The current time is "+cTime)
 
 static function GetCurrentDate(hParams as hash)
     local dDate as date:=Date()
     HB_SYMBOL_UNUSED(hParams)
-    return "The current date is " + hb_DToC(dDate, "yyyy.mm.dd")
+    return("The current date is "+hb_DToC(dDate,"yyyy.mm.dd"))
 
 static function GetCurrentDateTime(hParams as hash)
     local tTimeStamp as datetime:=hb_DateTime()
     HB_SYMBOL_UNUSED(hParams)
-    return "The current date and time is " + hb_TSToSTR(tTimeStamp,.T.)
+    return("The current date and time is "+hb_TSToSTR(tTimeStamp,.T.))

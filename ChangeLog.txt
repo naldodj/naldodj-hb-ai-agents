@@ -3,6 +3,23 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-04 17:45 UTC naldodj (% Optimizations: Extensive changes applied — cleaned up, restructured, and enhanced core functionalities.)
+  + src/tst/agent_datediff.prg
+  + src/tst/hb_core_agents.hbp
+  + src/agents/agent_datediff.prg
+  * src/agents/agent_math.prg
+  * src/core/tagent.prg
+  * src/core/tlmstudio.prg
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_lmstudio.hbp
+  * src/tst/hb_agents_lmstudio.prg
+  * src/tst/hb_agents_ollama.exe
+  * src/tst/hb_agents_ollama.hbp
+  * src/agents/agent_datetime.prg
+  * src/agents/agent_filesystem.prg
+  * src/core/tollama.prg
+  * src/tst/hb_agents_ollama.prg
+
 2025-04-04 01:25 UTC naldodj (% Optimizations)
   * src/agents/agent_datetime.prg
   * src/agents/agent_filesystem.prg

@@ -1,0 +1,17 @@
+-w3 -es2
+
+-cpp
+
+#Enable debugging (comment this line to disable it)
+-DDEBUG
+
+-i../../include/
+
+../core/tagent.prg
+../core/tollama.prg
+../core/tlmstudio.prg
+
+../agents/agent_filesystem.prg
+../agents/agent_math.prg
+../agents/agent_datediff.prg
+../agents/agent_datetime.prg

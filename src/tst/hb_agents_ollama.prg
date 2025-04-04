@@ -37,8 +37,35 @@ procedure Main()
 
 static procedure Execute()
 
+    local aPrompts as array:=Array(0)
+
     local cPrompt as character
     local cResponse as character
+
+    local nPrompt
+
+    aAdd(aPrompts,"What the current 'time' is it?")
+    aAdd(aPrompts,"What 'date' is Today?")
+    aAdd(aPrompts,"What the current 'date and time' is it?")
+    aAdd(aPrompts,"Create a folder named 'test'")
+    aAdd(aPrompts,"Create a file called './test/test.txt'")
+    aAdd(aPrompts,"Modify the file './test/test.txt' with content 'Hello World'")
+    aAdd(aPrompts,"Delete the file './test/test.txt'")
+    aAdd(aPrompts,"What is 2 + 2?")
+    aAdd(aPrompts,"What is 2 - 2?")
+    aAdd(aPrompts,"What is 2 x 2?")
+    aAdd(aPrompts,"What is 2 / 2?")
+    aAdd(aPrompts,"What is (2 ^ 2)^2?")
+    aAdd(aPrompts,"How many days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today")
+    aAdd(aPrompts,"How many months have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
+    aAdd(aPrompts,"How many years have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
+    aAdd(aPrompts,"How many years, months, and days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
+    aAdd(aPrompts,"What is date 01/03/2025 + 10 days?")
+    aAdd(aPrompts,"What is date 01/03/2025 - 10 days?")
+    aAdd(aPrompts,"What is date 01/03/2025 + 10 months?")
+    aAdd(aPrompts,"What is date 01/03/2025 - 10 months?")
+    aAdd(aPrompts,"What is date 01/03/2025 + 10 years?")
+    aAdd(aPrompts,"What is date 01/03/2025 - 10 years?")
 
     WITH OBJECT TOLLama():New()
 
@@ -51,77 +78,16 @@ static procedure Execute()
         // Agent for math calculations
         :AddAgent(Agent_Math():Execute("GetAgents"))
 
-        cPrompt:="What the current 'time' is it?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
+        // Agent for Date operations
+        :AddAgent(Agent_DateDiff():Execute("GetAgents"))
 
-        cPrompt:="What 'date' is Today?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="What the current 'date and time' is it?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="Create a folder named 'test'"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="Create a file called './test/test.txt'"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="Modify the file './test/test.txt' with content 'Hello World'"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="Delete the file './test/test.txt'"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="What is 2 + 2?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="What is 2 - 2?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="What is 2 x 2?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="What is 2 / 2?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
-
-        cPrompt:="What is (2 ^ 2)^2?"
-        ? Replicate("=",MaxCol()),hb_eol()
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
-        :Send(cPrompt)
+        for nPrompt:=1 to Len(aPrompts)
+            cPrompt:=aPrompts[nPrompt]
+            ? Replicate("=",MaxCol()),hb_eol()
+            DispOut("DEBUG: Testing ","RB+/n")
+            ? cPrompt,hb_eol()
+            :Send(cPrompt)
+        next nPrompt
 
         cPrompt:="What's the weather like?"
         ? Replicate("=",MaxCol()),hb_eol()

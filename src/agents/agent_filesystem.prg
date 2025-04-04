@@ -3,7 +3,7 @@
   __ _   __ _   ___  _ __  | |_     / _|(_)| |  ___  ___  _   _  ___ | |_   ___  _ __ ___
  / _` | / _` | / _ \| '_ \ | __|   | |_ | || | / _ \/ __|| | | |/ __|| __| / _ \| '_ ` _ \
 | (_| || (_| ||  __/| | | || |_    |  _|| || ||  __/\__ \| |_| |\__ \| |_ |  __/| | | | | |
- \__,_| \__, | \___||_| |_| \__|   |_|  |_||_| \___||___/ \__, ||___/ \__| \___||_| |_| |_|
+ \__,_| \__, | \___||_| |_| \__|   |_|  |_||_| \___||___/ \__,||___/ \__| \___||_| |_| |_|
         |___/                                             |___/
 
 Ref.: FiveTech Software tech support forums
@@ -24,88 +24,123 @@ static function GetAgents()
 
     local oTAgent as object
 
-    local cMessage as character
+    local cAgentPrompt as character
+    local cAgentPurpose as character
 
-    #pragma __cstream|cMessage:=%s
-Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
-select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
-where each tool has specific parameter names defined (e.g., "create_folder" expects "folder_name", "modify_file" expects "file_name" and "content").
-Extract the relevant values from the prompt and map them to the exact parameter names required by the selected tool, as specified in the tool`s definition.
-Do not use a generic "params" key; instead, use only the defined parameter names.
-Return a JSON object with 'tool' (the tool name) and 'params' (a hash with the exact parameter names and their values from the prompt, or an empty hash if no parameters are required).
-Provide only a JSON object containing 'tool' (the tool name) and 'params' (an empty object, as no parameters are required), with no additional text or explanation.
-Examples:
-- For "Create a folder named 'folderName'": {"tool":"create_folder","params":{"folder_name":"folderName"}}
-- For "Create a file named 'fileName'": {"tool":"create_file","params":{"file_name":"fileName"}}
-- For "Modify 'fileName' with content 'text'": {"tool":"modify_file","params":{"file_name":"fileName","content":"text"}}
-- For "Delete the file 'fileName'": {"tool":"delete_file","params":{"file_name":"fileName"}}
+    local hParameters as hash
+
+    #pragma __cstream|cAgentPrompt:=%s
+**Prompt:** Based on `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, select the correct tool from:
+```json
+__JSON_HTOOLS__
+```
+### Rules:
+- Each tool has specific required parameters (e.g., `create_folder` → `folder_name`, `modify_file` → `file_name`, `content`).
+- Extract values from the prompt and match them exactly to the expected parameter names.
+- Do **not** use a generic `"params"` object with arbitrary keys.
+- Only include the parameters defined by the tool (or return an empty object if none are needed).
+### Output:
+Return only a JSON object:
+```json
+{"tool":"<tool_name>","params":{"param1":"value1", ...}}
+```
+### Examples:
+- "Create a folder named 'folderName'" →
+  ```json
+  {"tool":"create_folder","params":{"folder_name":"folderName"}}
+  ```
+- "Modify 'fileName' with content 'text'" →
+  ```json
+  {"tool":"modify_file","params":{"file_name":"fileName","content":"text"}}
+  ```
     #pragma __endtext
 
-    oTAgent:=TAgent():New("agent_filesystem",cMessage)
+    #pragma __cstream|cAgentPurpose:=%s
+The "agent_filesystem" provides tools for performing basic file system operations, enabling users to manage files and directories programmatically. It is designed to automate tasks such as creating, modifying, and deleting files, as well as creating folders, through a set of specialized functions.
+    #pragma __endtext
 
-    oTAgent:aAddTool("create_file",{|hParams|Agent_FileSystem():Execute("CreateFile",hParams)},{"params"=>["file_name"]})
-    oTAgent:aAddTool("modify_file",{|hParams|Agent_FileSystem():Execute("ModifyFile",hParams)},{"params"=>["file_name","content"]})
-    oTAgent:aAddTool("delete_file",{|hParams|Agent_FileSystem():Execute("DeleteFile",hParams)},{"params"=>["file_name"]})
-    oTAgent:aAddTool("create_folder",{|hParams|Agent_FileSystem():Execute("CreateFolder",hParams)},{"params"=>["folder_name"]})
+    oTAgent:=TAgent():New("Agent_FileSystem",cAgentPrompt,cAgentPurpose)
 
-    return(oTAgent)
+    hParameters:={"params"=>["file_name"]}
+    oTAgent:aAddTool("create_file",{|hParams|Agent_FileSystem():Execute("CreateFile",hParams)},hParameters)
+    oTAgent:aAddTool("delete_file",{|hParams|Agent_FileSystem():Execute("DeleteFile",hParams)},hParameters)
+
+    hParameters:={"params"=>["file_name","content"]}
+    oTAgent:aAddTool("modify_file",{|hParams|Agent_FileSystem():Execute("ModifyFile",hParams)},hParameters)
+
+    hParameters:={"params"=>["folder_name"]}
+    oTAgent:aAddTool("create_folder",{|hParams|Agent_FileSystem():Execute("CreateFolder",hParams)},hParameters)
+
+    return(oTAgent) as object
 
 static function CreateFolder(hParams as hash)
     local cFolder as character
-    if (hb_HHasKey(hParams, "folder_name") .and. !Empty(hParams["folder_name"]))
+    local cMessage as character
+    if (hb_HHasKey(hParams,"folder_name").and.!Empty(hParams["folder_name"]))
         cFolder:=hParams["folder_name"]
-        if hb_DirExists(cFolder)
-            return "Folder '" + cFolder + "' already exists"
-        elseif hb_DirCreate(cFolder) == 0
-            return "Folder '" + cFolder + "' created successfully"
+        if (hb_DirExists(cFolder))
+            cMessage:="Folder '"+cFolder+"' already exists"
+        elseif (hb_DirCreate(cFolder)==0)
+            cMessage:="Folder '"+cFolder+"' created successfully"
         else
-            return "Failed to create folder: no name specified"
+            cMessage:="Failed to create folder: no name specified"
         endif
+    else
+        cMessage:="Failed to create folder: no name specified"
     endif
-    return "Failed to create folder: no name specified"
+    return(cMessage) as character
 
 static function CreateFile(hParams as hash)
     local cFile as character
-    if (hb_HHasKey(hParams, "file_name") .and. !Empty(hParams["file_name"]))
+    local cMessage as character
+    if ((hb_HHasKey(hParams,"file_name").and.!Empty(hParams["file_name"])))
         cFile:=hParams["file_name"]
-        if hb_MemoWrit(cFile, "")
-            return "File '" + cFile + "' created successfully"
+        if (hb_MemoWrit(cFile,""))
+            cMessage:="File '"+cFile+"' created successfully"
         else
-            return "Failed to create file: no name specified"
+            cMessage:="Failed to create file: no name specified"
         endif
+    else
+        cMessage:="Failed to create file: no name specified"
     endif
-    return "Failed to create file: no name specified"
+    return(cMessage) as character
 
 static function ModifyFile(hParams as hash)
     local cFile as character
     local cContent as character
+    local cMessage as character
     if (;
-        (hb_HHasKey(hParams, "file_name") .and. !Empty(hParams["file_name"]));
+        (hb_HHasKey(hParams,"file_name").and.!Empty(hParams["file_name"]));
         .and.;
-        (hb_HHasKey(hParams, "content") .and. !Empty(hParams["content"]));
+        (hb_HHasKey(hParams,"content").and.!Empty(hParams["content"]));
       )
         cFile:=hParams["file_name"]
         cContent:=hParams["content"]
-        if hb_MemoWrit(cFile, cContent)
-            return "File '" + cFile + "' modified with content: " + cContent
+        if (hb_MemoWrit(cFile,cContent))
+            cMessage:="File '"+cFile+"' modified with content: "+cContent
         else
-            return "Failed to modify file: missing file name or content"
+            cMessage:="Failed to modify file: missing file name or content"
         endif
+    else
+        cMessage:="Failed to modify file: missing file name or content"
     endif
-    return "Failed to modify file: missing file name or content"
+    return(cMessage) as character
 
 static function DeleteFile(hParams as hash)
     local cFile as character
-    if (hb_HHasKey(hParams, "file_name") .and. !Empty(hParams["file_name"]))
+    local cMessage as character
+    if ((hb_HHasKey(hParams,"file_name").and.!Empty(hParams["file_name"])))
         cFile:=hParams["file_name"]
-        if hb_FileExists(cFile)
+        if (hb_FileExists(cFile))
             if (fErase(cFile)==0)
-                return "File '" + cFile + "' deleted successfully"
+                cMessage:="File '"+cFile+"' deleted successfully"
             else
-                return "Failed to delete file '" + cFile + "'"
+                cMessage:="Failed to delete file '"+cFile+"'"
             endif
         else
-            return "File '" + cFile + "' does not exist"
+            cMessage:="File '"+cFile+"' does not exist"
         endif
+    else
+        cMessage:="Failed to delete file: no name specified"
     endif
-    return "Failed to delete file: no name specified"
+    return(cMessage) as character

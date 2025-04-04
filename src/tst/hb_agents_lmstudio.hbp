@@ -8,12 +8,7 @@
 #Enable debugging (comment this line to disable it)
 -DDEBUG
 
-../core/tagent.prg
-../core/tlmstudio.prg
-
-../agents/agent_filesystem.prg
-../agents/agent_math.prg
-../agents/agent_datetime.prg
+@./hb_core_agents.hbp
 
 ./hb_agents_lmstudio.prg
 

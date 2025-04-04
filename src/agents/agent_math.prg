@@ -22,33 +22,54 @@ static function GetAgents()
 
     local oTAgent as object
 
-    local cMessage as character
+    local cAgentPrompt as character
+    local cAgentPurpose as character
 
-    #pragma __cstream|cMessage:=%s
-Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
-select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
-Analyze the prompt and choose the tool that best matches its intent:
-Return a JSON object with 'tool' (the tool name) and 'params'.
-Provide only a JSON object containing 'tool' (the tool name) and 'params' (an empty object, as no parameters are required), with no additional text or explanation.
-Examples:
-- For "What is 2 + 2?": {"tool":"evaluate","params":{"expression":"2+2"}}
-- For "What is 2 * 2?": {"tool":"evaluate","params":{"expression":"2*2"}}
-- For "What is 2 x 2?": {"tool":"evaluate","params":{"expression":"2*2"}}
-- For "What is 2 / 2?": {"tool":"evaluate","params":{"expression":"2/2"}}
-- For "What is 2 - 2?": {"tool":"evaluate","params":{"expression":"2-2"}}
-- For "What is 2 ^ 2?": {"tool":"evaluate","params":{"expression":"2^2"}}
+    local hParameters as hash
+
+    #pragma __cstream|cAgentPrompt:=%s
+**Prompt:** Based on `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, select the best matching tool from:
+```json
+__JSON_HTOOLS__
+```
+### Rules:
+- Identify the intent from the prompt.
+- Choose the tool accordingly.
+- Extract required values (e.g., `expression`) and map them using exact parameter names.
+### Output:
+Return only a JSON object:
+```json
+{"tool":"<tool_name>","params":{"<param_name>":"<value>"}}
+```
+### Examples:
+- "What is 2 + 2?" →
+  ```json
+  {"tool":"evaluate","params":{"expression":"2+2"}}
+  ```
+- "What is 2 x 2?" →
+  ```json
+  {"tool":"evaluate","params":{"expression":"2*2"}}
+  ```
     #pragma __endtext
 
-    oTAgent:=TAgent():New("agent_math",cMessage)
+    #pragma __cstream|cAgentPurpose:=%s
+The "agent_math" provides tools for performing basic mathematical operations by evaluating user-provided expressions. It is designed to handle fundamental arithmetic tasks such as addition, subtraction, multiplication, division, and exponentiation, making it a straightforward solution for quick calculations.
+    #pragma __endtext
 
-    oTAgent:aAddTool("evaluate",{|hParams|Agent_Math():Execute("EvaluateExpression",hParams)},{"params"=>["expression"]})
+    oTAgent:=TAgent():New("Agent_Math",cAgentPrompt,cAgentPurpose)
+
+    hParameters:={"params"=>["expression"]}
+    oTAgent:aAddTool("evaluate",{|hParams|Agent_Math():Execute("EvaluateExpression",hParams)},hParameters)
 
     return(oTAgent)
 
 static function EvaluateExpression(hParams as hash)
+    local cMessage as character
     local cExpression as character
-    if hb_HHasKey(hParams, "expression") .and. !Empty(hParams["expression"])
+    if (hb_HHasKey(hParams,"expression").and.!Empty(hParams["expression"]))
         cExpression:=hb_StrReplace(hParams["expression"],{"x"=>"*","X"=>"*"})
-        return "The result of " + cExpression + " is " + hb_NToC(&cExpression)
+        cMessage:="The result of "+cExpression+" is "+hb_NToC(&cExpression)
+    else
+        cMessage:="Failed to evaluate expression: no expression specified"
     endif
-    return "Failed to evaluate expression: no expression specified"
+    return(cMessage)

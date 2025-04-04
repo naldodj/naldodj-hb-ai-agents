@@ -16,17 +16,24 @@ Released to Public Domain.
 #include "hbclass.ch"
 
 CLASS TAgent
-    DATA cMessage as character
+
     DATA cCategory as character
+    DATA cAgentPrompt as character
+    DATA cAgentPurpose as character
+
     DATA hTools INIT {=>} as hash
-    METHOD New(cCategory as character,cMessage as character) as object
+
+    METHOD New(cCategory as character,cAgentPrompt as character,cAgentPurpose as character) as object
     METHOD aAddTool(cToolName as character,bToolAction as codeblock,hToolParameters as hash) as object
+
 ENDCLASS
 
-METHOD New(cCategory as character,cMessage as character) CLASS TAgent
+METHOD New(cCategory as character,cAgentPrompt as character,cAgentPurpose as character) CLASS TAgent
     self:cCategory:=cCategory
-    hb_default(@cMessage,"")
-    self:cMessage:=cMessage
+    hb_default(@cAgentPrompt,"")
+    self:cAgentPrompt:=cAgentPrompt
+    hb_default(@cAgentPurpose,cCategory)
+    self:cAgentPurpose:=cAgentPurpose
     return(self) as object
 
 METHOD aAddTool(cToolName as character,bToolAction as codeblock,hToolParameters as hash) CLASS TAgent
