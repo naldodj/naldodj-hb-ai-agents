@@ -37,10 +37,10 @@ procedure Main()
 
 static procedure Execute()
 
-    local aBackAgents as array
-
     local cPrompt as character
     local cResponse as character
+
+    local hBackAgents as hash
 
     WITH OBJECT TLMStudio():New()
 
@@ -134,14 +134,15 @@ static procedure Execute()
         DispOut("DEBUG: result: ","GR+/n")
         ? cResponse
 
-        aBackAgents:=:aAgents
+        hBackAgents:=:hAgents
+
         :End()
 
     END WITH
 
     WITH OBJECT TLMStudio():New("qwen2.5-7b-instruct-1m")
 
-        :aAgents:=aBackAgents
+        :hAgents:=hBackAgents
 
         cPrompt:="What is Dom Pedro II's full name?"
         ? Replicate("=",MaxCol()),hb_eol()

@@ -15,10 +15,10 @@ Released to Public Domain.
 #include "hb_namespace.ch"
 
 HB_NAMESPACE Agent_FileSystem METHOD "GetAgents" POINTER @GetAgents(),;
-                                     "CreateFolder" POINTER @CreateFolder(),;
                                      "CreateFile" POINTER @CreateFile(),;
                                      "ModifyFile" POINTER @ModifyFile(),;
-                                     "DeleteFile" POINTER @DeleteFile()
+                                     "DeleteFile" POINTER @DeleteFile(),;
+                                     "CreateFolder" POINTER @CreateFolder()
 
 static function GetAgents()
 
@@ -41,16 +41,12 @@ Examples:
 - For "Delete the file 'fileName'": {"tool":"delete_file","params":{"file_name":"fileName"}}
     #pragma __endtext
 
-    oTAgent:=TAgent():New(;
-        "agent_filesystem";
-        ,{;
-             {"create_folder",{|hParams| Agent_FileSystem():Execute("CreateFolder",hParams)},{"params" => ["folder_name"]}};
-            ,{"create_file",{|hParams| Agent_FileSystem():Execute("CreateFile",hParams)},{"params" => ["file_name"]}};
-            ,{"modify_file",{|hParams| Agent_FileSystem():Execute("ModifyFile",hParams)},{"params" => ["file_name","content"]}};
-            ,{"delete_file",{|hParams| Agent_FileSystem():Execute("DeleteFile",hParams)},{"params" => ["file_name"]}};
-        };
-        ,cMessage;
-   )
+    oTAgent:=TAgent():New("agent_filesystem",cMessage)
+
+    oTAgent:aAddTool("create_file",{|hParams|Agent_FileSystem():Execute("CreateFile",hParams)},{"params"=>["file_name"]})
+    oTAgent:aAddTool("modify_file",{|hParams|Agent_FileSystem():Execute("ModifyFile",hParams)},{"params"=>["file_name","content"]})
+    oTAgent:aAddTool("delete_file",{|hParams|Agent_FileSystem():Execute("DeleteFile",hParams)},{"params"=>["file_name"]})
+    oTAgent:aAddTool("create_folder",{|hParams|Agent_FileSystem():Execute("CreateFolder",hParams)},{"params"=>["folder_name"]})
 
     return(oTAgent)
 

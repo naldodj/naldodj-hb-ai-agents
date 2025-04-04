@@ -39,13 +39,9 @@ Examples:
 - For "What is 2 ^ 2?": {"tool":"evaluate","params":{"expression":"2^2"}}
     #pragma __endtext
 
-    oTAgent:=TAgent():New(;
-        "agent_math";
-        ,{;
-             {"evaluate",{|hParams|Agent_Math():Execute("EvaluateExpression",hParams)},{"params" => ["expression"]}};
-        };
-        ,cMessage;
-   )
+    oTAgent:=TAgent():New("agent_math",cMessage)
+
+    oTAgent:aAddTool("evaluate",{|hParams|Agent_Math():Execute("EvaluateExpression",hParams)},{"params"=>["expression"]})
 
     return(oTAgent)
 

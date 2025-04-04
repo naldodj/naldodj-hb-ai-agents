@@ -47,15 +47,11 @@ Examples:
 - For "What the current date and time is it?": {"tool":"get_current_date_time","params":{}}
     #pragma __endtext
 
-    oTAgent:=TAgent():New(;
-        "agent_datetime";
-        ,{;
-             {"get_current_time",{|hParams|Agent_DateTime():Execute("GetCurrentTime",hParams)},{"params"=>[""]}};
-            ,{"get_current_date",{|hParams|Agent_DateTime():Execute("GetCurrentDate",hParams)},{"params"=>[""]}};
-            ,{"get_current_date_time",{|hParams|Agent_DateTime():Execute("GetCurrentDateTime",hParams)},{"params"=>[""]}};
-        };
-        ,cMessage;
-   )
+    oTAgent:=TAgent():New("agent_datetime",cMessage)
+
+    oTAgent:aAddTool("get_current_time",{|hParams|Agent_DateTime():Execute("GetCurrentTime",hParams)})
+    oTAgent:aAddTool("get_current_date",{|hParams|Agent_DateTime():Execute("GetCurrentDate",hParams)})
+    oTAgent:aAddTool("get_current_date_time",{|hParams|Agent_DateTime():Execute("GetCurrentDateTime",hParams)})
 
     return(oTAgent)
 

@@ -3,6 +3,17 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-04 01:25 UTC naldodj (% Optimizations)
+  * src/agents/agent_datetime.prg
+  * src/agents/agent_filesystem.prg
+  * src/agents/agent_math.prg
+  * src/core/tagent.prg
+  * src/core/tlmstudio.prg
+  * src/core/tollama.prg
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_ollama.exe
+  * src/tst/hb_agents_lmstudio.prg
+
 2025-04-03 21:34 UTC naldodj
   * .gitignore
   * src/core/tagent.prg

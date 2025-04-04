@@ -18,13 +18,19 @@ Released to Public Domain.
 CLASS TAgent
     DATA cMessage as character
     DATA cCategory as character
-    DATA aTools as array
-    METHOD New(cCategory as character,aTools as array,cMessage as character) as object
+    DATA hTools INIT {=>} as hash
+    METHOD New(cCategory as character,cMessage as character) as object
+    METHOD aAddTool(cToolName as character,bToolAction as codeblock,hToolParameters as hash) as object
 ENDCLASS
 
-METHOD New(cCategory as character,aTools as array,cMessage as character) CLASS TAgent
+METHOD New(cCategory as character,cMessage as character) CLASS TAgent
     self:cCategory:=cCategory
-    self:aTools:=aTools
     hb_default(@cMessage,"")
     self:cMessage:=cMessage
-return(self) as object
+    return(self) as object
+
+METHOD aAddTool(cToolName as character,bToolAction as codeblock,hToolParameters as hash) CLASS TAgent
+    cToolName:=Lower(allTrim(cToolName))
+    hb_Default(@hToolParameters,{"params"=>[""]})
+    self:hTools[cToolName]:={"action"=>bToolAction,"parameters"=>hToolParameters}
+    return(self)

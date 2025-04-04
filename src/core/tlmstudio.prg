@@ -20,12 +20,12 @@ Released to Public Domain.
 
 CLASS TLMStudio
 
-    DATA aAgents INIT {} as array
-
     DATA cUrl as character
     DATA cModel as character
     DATA cPrompt as character
     DATA cResponse as character
+
+    DATA hAgents INIT {=>} as hash
 
     DATA phCurl as pointer
 
@@ -48,7 +48,7 @@ METHOD New(cModel as character) CLASS TLMStudio
     self:cUrl:="http://127.0.0.1:1234/v1/chat/completions"
     curl_global_init()
     self:phCurl:=curl_easy_init()
-    self:aAgents:={}
+    self:hAgents:={=>}
     return(self) as object
 
 METHOD GetPromptCategory(cPrompt as character) CLASS TLMStudio
@@ -64,8 +64,8 @@ METHOD GetPromptCategory(cPrompt as character) CLASS TLMStudio
     local nError as numeric
 
     cCategories:="'general'"
-    if (!Empty(self:aAgents))
-        aEval(self:aAgents,{|o as object|cCategories+=",'"+o:cCategory+"'"})
+    if (!Empty(self:hAgents))
+        hb_HEval(self:hAgents,{|k as character|cCategories+=",'"+k+"'"})
     endif
 
     curl_easy_reset(self:phCurl)
@@ -111,6 +111,7 @@ METHOD GetPromptCategory(cPrompt as character) CLASS TLMStudio
 
 METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLMStudio
 
+    local cKey as character
     local cJSON as character
     local cMessage as character
     local cToolResponse as character
@@ -121,13 +122,12 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLMStudio
     local hResponse as hash
     local hToolInfo as hash
 
-    local nI as numeric
     local nError as numeric
 
-    if (!Empty(oTAgent:aTools))
-        for nI:=1 to Len(oTAgent:aTools)
-            hTools[oTAgent:aTools[nI][1]]:={"parameters"=>oTAgent:aTools[nI][3]}
-        next nI
+    if (!Empty(oTAgent:hTools))
+        for each cKey in hb_HKeys(oTAgent:hTools)
+            hTools[cKey]:={"parameters"=>oTAgent:hTools[cKey]["parameters"]}
+        next each
     endif
 
     curl_easy_reset(self:phCurl)
@@ -232,7 +232,7 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
     local lContinue as logical:=.T.
 
     local nTool as numeric
-    local nAgent as numeric
+    local nCategory as numeric
 
     local oTAgent as object
 
@@ -250,7 +250,7 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
 
         begin sequence
 
-            if (Empty(self:aAgents))
+            if (Empty(self:hAgents))
                 #ifdef DEBUG
                     DispOut("DEBUG: ","r+/n")
                     ? "No agents defined",hb_eol()
@@ -282,8 +282,9 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
                 break
             endif
 
-            nAgent:=aScan(self:aAgents,{|x|(Lower(allTrim(x:cCategory))==Lower(allTrim(cCategory)))})
-            if (nAgent==0)
+            cCategory:=Lower(allTrim(cCategory))
+            nCategory:=hb_HPos(self:hAgents,cCategory)
+            if (nCategory==0)
                 #ifdef DEBUG
                     DispOut("DEBUG: ","r+/n")
                     ? "No agent found for category '"+cCategory+"'",hb_eol()
@@ -293,7 +294,7 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
                 break
             endif
 
-            oTAgent:=self:aAgents[nAgent]
+            oTAgent:=hb_HValueAt(self:hAgents,nCategory)
 
             hToolInfo:=self:GetToolName(cPrompt,oTAgent)
             #ifdef DEBUG
@@ -333,7 +334,9 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
                 break
             endif
 
-            if ((nTool:=aScan(oTAgent:aTools,{|x|Lower(allTrim(x[1]))==Lower(allTrim(cToolName))}))==0)
+            cToolName:=Lower(allTrim(cToolName))
+            nTool:=hb_HPos(oTAgent:hTools,cToolName)
+            if (nTool==0)
                 #ifdef DEBUG
                     DispOut("DEBUG: Tool ","g+/n")
                     ? "'"+cToolName+"' not found in agent '"+oTAgent:cCategory+"'",hb_eol()
@@ -343,7 +346,7 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
                 break
             endif
 
-            cToolResult:=Eval(oTAgent:aTools[nTool][2],hToolInfo["params"])
+            cToolResult:=Eval(oTAgent:hTools[cToolName]["action"],hToolInfo["params"])
             #ifdef DEBUG
                 DispOut("DEBUG: Tool result: ","GR+/n")
                 ? cToolResult,hb_eol()
@@ -423,7 +426,12 @@ METHOD PROCEDURE End() CLASS TLMStudio
     return
 
 METHOD AddAgent(oTAgent as object) CLASS TLMStudio
-    aAdd(self:aAgents,oTAgent)
+    local cCategory as character:=Lower(allTrim(oTAgent:cCategory))
+    local nCategory as numeric
+    nCategory:=hb_HPos(self:hAgents,cCategory)
+    if (nCategory==0)
+        self:hAgents[cCategory]:=oTAgent
+    endif
     return(self) as object
 
 METHOD GetValue(cHKey as character) CLASS TLMStudio
