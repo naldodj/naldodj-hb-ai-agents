@@ -23,8 +23,8 @@ CLASS TAgent
 ENDCLASS
 
 METHOD New(cCategory as character,aTools as array,cMessage as character) CLASS TAgent
-    ::cCategory:=cCategory
-    ::aTools:=aTools
+    self:cCategory:=cCategory
+    self:aTools:=aTools
     hb_default(@cMessage,"")
-    ::cMessage:=cMessage
+    self:cMessage:=cMessage
 return(self) as object

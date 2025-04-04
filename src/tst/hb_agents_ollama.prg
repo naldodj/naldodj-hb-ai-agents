@@ -75,19 +75,19 @@ static procedure Execute()
         ? cPrompt,hb_eol()
         :Send(cPrompt)
 
-        cPrompt:="Create a file called 'test.txt'"
+        cPrompt:="Create a file called './test/test.txt'"
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
         ? cPrompt,hb_eol()
         :Send(cPrompt)
 
-        cPrompt:="Modify the file 'test.txt' with content 'Hello World'"
+        cPrompt:="Modify the file './test/test.txt' with content 'Hello World'"
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
         ? cPrompt,hb_eol()
         :Send(cPrompt)
 
-        cPrompt:="Delete the file 'test.txt'"
+        cPrompt:="Delete the file './test/test.txt'"
         ? Replicate("=",MaxCol()),hb_eol()
         DispOut("DEBUG: Testing ","RB+/n")
         ? cPrompt,hb_eol()

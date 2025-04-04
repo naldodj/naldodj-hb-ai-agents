@@ -20,104 +20,127 @@ Released to Public Domain.
 
 CLASS TOLLama
 
-    DATA cModel
-    DATA cPrompt
-    DATA cResponse
-    DATA cUrl
-    DATA hCurl
-    DATA nError INIT 0
-    DATA nHttpCode INIT 0
-    DATA aAgents INIT {}
+    DATA aAgents INIT {} as array
 
-    METHOD New(cModel)
-    METHOD Send(cPrompt,cImageFileName,bWriteFunction)
-    METHOD GetPromptCategory(cPrompt)
-    METHOD GetToolName(cPrompt,oTAgent)
+    DATA cUrl as character
+    DATA cModel as character
+    DATA cPrompt as character
+    DATA cResponse as character
+
+    DATA phCurl as pointer
+
+    DATA nError INIT 0 as numeric
+    DATA nHttpCode INIT 0 as numeric
+
+    METHOD New(cModel as character) as object
+    METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as codeblock) as character
+    METHOD GetPromptCategory(cPrompt as character) as character
+    METHOD GetToolName(cPrompt as character,oTAgent as object) as hash
     METHOD End()
-    METHOD GetValue()
-    METHOD AddAgent(oTAgent)
+    METHOD GetValue() as anytype
+    METHOD AddAgent(oTAgent as object) as object
 
 ENDCLASS
 
-METHOD New(cModel) CLASS TOLLama
+METHOD New(cModel as character) CLASS TOLLama
     hb_default(@cModel,"gemma3")
-    ::cModel:=cModel
-    ::cUrl:="http://localhost:11434/api/chat"
-    ::hCurl:=curl_easy_init()
-    ::aAgents:={}
-return Self
+    self:cModel:=cModel
+    self:cUrl:="http://localhost:11434/api/chat"
+    curl_global_init()
+    self:phCurl:=curl_easy_init()
+    self:aAgents:={}
+    return(self) as object
 
-METHOD GetPromptCategory(cPrompt) CLASS TOLLama
+METHOD GetPromptCategory(cPrompt as character) CLASS TOLLama
 
-    local cJson,hRequest:={ => },hMessage:={ => }
-    local cCategoryResponse,hResponse
-    local nError,cCategories,nI
+    local cJSON as character
+    local cCategories as character
+    local cCategoryResponse as character
+
+    local hMessage as hash:={=>}
+    local hRequest as hash:={=>}
+    local hResponse as hash
+
+    local nError as numeric
 
     cCategories:="'general'"
-    if !Empty(::aAgents)
-        for nI:=1 to Len(::aAgents)
-            cCategories += ",'" + ::aAgents[nI]:cCategory + "'"
-        next
+    if (!Empty(self:aAgents))
+        aEval(self:aAgents,{|o as object|cCategories+=",'"+o:cCategory+"'"})
     endif
 
-    curl_easy_reset(::hCurl)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_POST,.T.)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_URL,::cUrl)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_HTTPHEADER,{ "Content-Type: application/json" })
-    curl_easy_setopt(::hCurl,HB_CURLOPT_USERNAME,'')
-    curl_easy_setopt(::hCurl,HB_CURLOPT_DL_BUFF_SETUP)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
+    curl_easy_reset(self:phCurl)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_POST,.T.)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_URL,self:cUrl)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_HTTPHEADER,{"Content-Type: application/json"})
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_USERNAME,'')
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_DL_BUFF_SETUP)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
 
-    hRequest["model"]:=::cModel
+    hRequest["model"]:=self:cModel
     hMessage["role"]:="user"
-    hMessage["content"]:="Classify this prompt: '" + cPrompt + "' into one of these categories: " + cCategories + ". Respond with only the category name."
-    hRequest["messages"]:={ hMessage }
+    hMessage["content"]:="Classify this prompt: '"+cPrompt+"' into one of these categories: "+cCategories+". Respond with only the category name."
+    hRequest["messages"]:={hMessage}
     hRequest["stream"]:=.F.
     hRequest["temperature"]:=0.5
 
-    cJson:=hb_jsonEncode(hRequest)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_POSTFIELDS,cJson)
+    cJSON:=hb_jsonEncode(hRequest)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_POSTFIELDS,cJSON)
 
-    nError:=curl_easy_perform(::hCurl)
-    if nError == HB_CURLE_OK
-        cCategoryResponse:=curl_easy_dl_buff_get(::hCurl)
+    nError:=curl_easy_perform(self:phCurl)
+    if (nError==HB_CURLE_OK)
+        cCategoryResponse:=curl_easy_dl_buff_get(self:phCurl)
         hb_jsonDecode(cCategoryResponse,@hResponse)
+        cCategoryResponse:=hResponse["message"]["content"]
         #ifdef DEBUG
             DispOut("DEBUG: Category returned by AI: ","g+/n")
-            ? hResponse["message"]["content"],hb_eol()
+            ? cCategoryResponse,hb_eol()
         #endif
-        return hResponse["message"]["content"]
+    else
+        cCategoryResponse:=""
     endif
-    #ifdef DEBUG
-        DispOut("DEBUG: ","r+/n")
-        ? "Error in GetPromptCategory: "+hb_NToC(nError),hb_eol()
-    #endif
-return nil
 
-METHOD GetToolName(cPrompt,oTAgent) CLASS TOLLama
+    if (Empty(cCategoryResponse))
+        #ifdef DEBUG
+            DispOut("DEBUG: ","r+/n")
+            ? "Error in GetPromptCategory: "+hb_NToC(nError),hb_eol()
+        #endif
+    endif
 
-    local cJson,cMessage,hRequest:={ => },hMessage:={ => }
-    local cToolResponse,hResponse,hToolInfo
-    local nError,hTools:={=>},nI
+    return(cCategoryResponse) as character
 
-    if !Empty(oTAgent:aTools)
+METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TOLLama
+
+    local cJSON as character
+    local cMessage as character
+    local cToolResponse as character
+
+    local hTools as hash:={=>}
+    local hRequest as hash:={=>}
+    local hMessage as hash:={=>}
+    local hResponse as hash
+    local hToolInfo as hash
+
+    local nI as numeric
+    local nError as numeric
+
+    if (!Empty(oTAgent:aTools))
         for nI:=1 to Len(oTAgent:aTools)
             hTools[oTAgent:aTools[nI][1]]:={"parameters"=>oTAgent:aTools[nI][3]}
-        next
+        next nI
     endif
 
-    curl_easy_reset(::hCurl)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_POST,.T.)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_URL,::cUrl)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_HTTPHEADER,{ "Content-Type: application/json" })
-    curl_easy_setopt(::hCurl,HB_CURLOPT_USERNAME,'')
-    curl_easy_setopt(::hCurl,HB_CURLOPT_DL_BUFF_SETUP)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
+    curl_easy_reset(self:phCurl)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_POST,.T.)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_URL,self:cUrl)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_HTTPHEADER,{"Content-Type: application/json"})
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_USERNAME,'')
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_DL_BUFF_SETUP)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
 
-    hRequest["model"]:=::cModel
+    hRequest["model"]:=self:cModel
     hMessage["role"]:="user"
 
-    if Empty(oTAgent:cMessage)
+    if (Empty(oTAgent:cMessage))
 #pragma __cstream|cMessage:=%s
 Based on this prompt: '__PROMPT__' and category '__AGENT_CATEGORY__',
 select the appropriate tool from the following list: ```json __JSON_HTOOLS__```,
@@ -142,19 +165,19 @@ Examples:
             ,"__AGENT_CATEGORY__"=>oTAgent:cCategory;
             ,"__JSON_HTOOLS__"=>hb_JSONEncode(hTools);
         };
-   )
+    )
 
     hMessage["content"]:=cMessage
-    hRequest["messages"]:={ hMessage }
+    hRequest["messages"]:={hMessage}
     hRequest["stream"]:=.F.
     hRequest["temperature"]:=0.5
 
-    cJson:=hb_jsonEncode(hRequest)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_POSTFIELDS,cJson)
+    cJSON:=hb_jsonEncode(hRequest)
+    curl_easy_setopt(self:phCurl,HB_CURLOPT_POSTFIELDS,cJSON)
 
-    nError:=curl_easy_perform(::hCurl)
-    if nError == HB_CURLE_OK
-        cToolResponse:=curl_easy_dl_buff_get(::hCurl)
+    nError:=curl_easy_perform(self:phCurl)
+    if (nError==HB_CURLE_OK)
+        cToolResponse:=curl_easy_dl_buff_get(self:phCurl)
         hb_jsonDecode(cToolResponse,@hResponse)
         #ifdef DEBUG
             DispOut("DEBUG: Raw response from AI: ","g+/n")
@@ -174,190 +197,245 @@ Examples:
             if ValType(hToolInfo) == "H"
                 DispOut("DEBUG: Keys in hToolInfo:","g+/n")
                 ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
-            endif
-        #endif
-        return hToolInfo
-    endif
-    #ifdef DEBUG
-        DispOut("DEBUG: ","r+/n")
-        ? "Error in GetToolName:"+hb_NToC(nError),hb_eol()
-    #endif
-return nil
-
-METHOD Send(cPrompt,cImageFileName,bWriteFunction) CLASS TOLLama
-
-    local aHeaders,cJson,hRequest:={ => },hMessage:={ => }
-    local cBase64Image
-    local oTAgent,cToolResult,nI,hToolInfo,cToolName,nTool
-    local cCategory
-
-    if !Empty(cPrompt)
-        ::cPrompt:=cPrompt
-    endif
-
-    if !Empty(::aAgents)
-        cCategory:=::GetPromptCategory(cPrompt)
-        #ifdef DEBUG
-            DispOut("DEBUG: Obtained category (uncleaned): ","g+/n")
-            ? cCategory,hb_eol()
-        #endif
-        cCategory:=allTrim(hb_StrReplace(cCategory,{Chr(13)=>"",Chr(10)=>""}))
-        #ifdef DEBUG
-            DispOut("DEBUG: Obtained category (cleaned): ","g+/n")
-            ? cCategory,hb_eol()
-        #endif
-        if !Empty(cCategory)
-            if Lower(cCategory) == "general"
-                // Proceed to send to OLLama
             else
-                oTAgent:=nil
-                for nI:=1 to Len(::aAgents)
-                    if Lower(allTrim(::aAgents[nI]:cCategory)) == Lower(allTrim(cCategory))
-                        oTAgent:=::aAgents[nI]
-                        exit
-                    endif
-                next
-                if oTAgent != nil
-                    hToolInfo:=::GetToolName(cPrompt,oTAgent)
-                    #ifdef DEBUG
-                        DispOut("DEBUG: Received hToolInfo: ","g+/n")
-                        ? hb_jsonEncode(hToolInfo),hb_eol()
-                    #endif
-                    if ValType(hToolInfo) == "H" .and. hb_HHasKey(hToolInfo,"tool")
-                        cToolName:=allTrim(hb_StrReplace(hToolInfo["tool"],{Chr(13)=>"",Chr(10)=>""}))
-                        #ifdef DEBUG
-                            DispOut("DEBUG: Obtained tool (cleaned): ","g+/n")
-                            ? cToolName,hb_eol()
-                            DispOut("DEBUG: Extracted parameters: ","g+/n")
-                            ? hb_jsonEncode(hToolInfo["params"]),hb_eol()
-                        #endif
-                        if !Empty(cToolName)
-                            nTool:=AScan(oTAgent:aTools,{|x| Lower(allTrim(x[1])) == Lower(allTrim(cToolName)) })
-                            if nTool > 0
-                                cToolResult:=Eval(oTAgent:aTools[nTool][2],hToolInfo["params"])
-                                #ifdef DEBUG
-                                    DispOut("DEBUG: Tool result: ","GR+/n")
-                                    ? cToolResult,hb_eol()
-                                #endif
-                                ::cResponse:=hb_jsonEncode({ "message" => { "content" => cToolResult },"done" => .T. })
-                                return ::cResponse
-                            else
-                                #ifdef DEBUG
-                                    DispOut("DEBUG: Tool ","g+/n")
-                                    ? "'" + cToolName + "' not found in agent '" + oTAgent:cCategory + "'",hb_eol()
-                                #endif
-                                ::cResponse:=hb_jsonEncode({ "message" => { "content" => "Tool not found" },"done" => .T. })
-                                return ::cResponse
-                            endif
-                        else
-                            #ifdef DEBUG
-                                DispOut("DEBUG: ","r+/n")
-                                ? "No valid tool name obtained",hb_eol()
-                            #endif
-                            ::cResponse:=hb_jsonEncode({ "message" => { "content" => "No tool selected" },"done" => .T. })
-                            return ::cResponse
-                        endif
-                    else
-                        #ifdef DEBUG
-                            DispOut("DEBUG: Invalid response from GetToolName or missing 'tool'. Type: ","r+/n")
-                            ? ValType(hToolInfo),hb_eol()
-                            if ValType(hToolInfo) == "H"
-                                DispOut("DEBUG: Keys in hToolInfo: ","g+/n")
-                                ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
-                            endif
-                        #endif
-                        ::cResponse:=hb_jsonEncode({ "message" => { "content" => "Invalid tool response" },"done" => .T. })
-                        return ::cResponse
-                    endif
-                else
-                    #ifdef DEBUG
-                        DispOut("DEBUG: ","r+/n")
-                        ? "No agent found for category '" + cCategory + "'",hb_eol()
-                    #endif
-                    ::cResponse:=hb_jsonEncode({ "message" => { "content" => "Agent not found for category '" + cCategory + "'" },"done" => .T. })
-                    return ::cResponse
-                endif
+                hToolInfo:={=>}
             endif
-        else
-            #ifdef DEBUG
-                DispOut("DEBUG: ","r+/n")
-                ? "No valid category obtained",hb_eol()
-            #endif
-        endif
+        #endif
     else
+        hToolInfo:={=>}
+    endif
+
+    if (Empty(hToolInfo))
         #ifdef DEBUG
             DispOut("DEBUG: ","r+/n")
-            ? "No agents defined",hb_eol()
+            ? "Error in GetToolName:"+hb_NToC(nError),hb_eol()
         #endif
     endif
 
-    #ifdef DEBUG
-        DispOut("DEBUG: Calling OLLama API","g+/n")
-        ? hb_eol()
-    #endif
+    return(hToolInfo)
 
-    curl_easy_reset(::hCurl)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_POST,.T.)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_URL,::cUrl)
-    aHeaders:={ "Content-Type: application/json" }
-    curl_easy_setopt(::hCurl,HB_CURLOPT_HTTPHEADER,aHeaders)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_USERNAME,'')
-    curl_easy_setopt(::hCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
+METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as codeblock) CLASS TOLLama
 
-    hRequest["model"]:=::cModel
-    hMessage["role"]:="user"
-    hMessage["content"]:=::cPrompt
-    hRequest["messages"]:={ hMessage }
-    hRequest["temperature"]:=0.5
+    local aHeaders as array
 
-    if !Empty(cImageFileName)
-        if File(cImageFileName)
-            cBase64Image:=hb_base64Encode(memoRead(cImageFileName))
-            hMessage["images"]:={ cBase64Image }
+    local cJSON as character
+    local cToolName as character
+    local cCategory as character
+    local cToolResult as character
+    local cBase64Image as character
+
+    local hRequest as hash:={=>}
+    local hMessage as hash:={=>}
+    local hToolInfo as hash
+
+    local lContinue as logical:=.T.
+
+    local nTool as numeric
+    local nAgent as numeric
+
+    local oTAgent as object
+
+    begin SEQUENCE
+
+        self:cResponse:=""
+
+        if (!Empty(cPrompt))
+            self:cPrompt:=cPrompt
+        endif
+
+        if (Empty(self:cPrompt))
+            break
+        endif
+
+        begin sequence
+
+            if (Empty(self:aAgents))
+                #ifdef DEBUG
+                    DispOut("DEBUG: ","r+/n")
+                    ? "No agents defined",hb_eol()
+                #endif
+                break
+            endif
+
+            cCategory:=self:GetPromptCategory(cPrompt)
+            #ifdef DEBUG
+                DispOut("DEBUG: Obtained category (uncleaned): ","g+/n")
+                ? cCategory,hb_eol()
+            #endif
+
+            cCategory:=allTrim(hb_StrReplace(cCategory,{Chr(13)=>"",Chr(10)=>""}))
+            #ifdef DEBUG
+                DispOut("DEBUG: Obtained category (cleaned): ","g+/n")
+                ? cCategory,hb_eol()
+            #endif
+
+            if (Empty(cCategory))
+                #ifdef DEBUG
+                    DispOut("DEBUG: ","r+/n")
+                    ? "No valid category obtained",hb_eol()
+                #endif
+                break
+            endif
+
+            if (Lower(cCategory)=="general")
+                break
+            endif
+
+            nAgent:=aScan(self:aAgents,{|x|(Lower(allTrim(x:cCategory))==Lower(allTrim(cCategory)))})
+            if (nAgent==0)
+                #ifdef DEBUG
+                    DispOut("DEBUG: ","r+/n")
+                    ? "No agent found for category '"+cCategory+"'",hb_eol()
+                #endif
+                self:cResponse:=hb_jsonEncode({"message"=>{"content"=>"Agent not found for category '"+cCategory+"'"},"done"=>.T.})
+                lContinue:=.F.
+                break
+            endif
+
+            oTAgent:=self:aAgents[nAgent]
+
+            hToolInfo:=self:GetToolName(cPrompt,oTAgent)
+            #ifdef DEBUG
+                DispOut("DEBUG: Received hToolInfo: ","g+/n")
+                ? hb_jsonEncode(hToolInfo),hb_eol()
+            #endif
+
+            if ((ValType(hToolInfo)!="H").or.(!hb_HHasKey(hToolInfo,"tool")))
+                #ifdef DEBUG
+                    DispOut("DEBUG: Invalid response from GetToolName or missing 'tool'. Type: ","r+/n")
+                    ? ValType(hToolInfo),hb_eol()
+                    if (ValType(hToolInfo)=="H")
+                        DispOut("DEBUG: Keys in hToolInfo: ","g+/n")
+                        ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
+                    endif
+                #endif
+                self:cResponse:=hb_jsonEncode({"message"=>{"content"=>"Invalid tool response"},"done"=>.T.})
+                lContinue:=.F.
+                break
+            endif
+
+            cToolName:=allTrim(hb_StrReplace(hToolInfo["tool"],{Chr(13)=>"",Chr(10)=>""}))
+            #ifdef DEBUG
+                DispOut("DEBUG: Obtained tool (cleaned): ","g+/n")
+                ? cToolName,hb_eol()
+                DispOut("DEBUG: Extracted parameters: ","g+/n")
+                ? hb_jsonEncode(hToolInfo["params"]),hb_eol()
+            #endif
+
+            if (Empty(cToolName))
+                #ifdef DEBUG
+                    DispOut("DEBUG: ","r+/n")
+                    ? "No valid tool name obtained",hb_eol()
+                #endif
+                self:cResponse:=hb_jsonEncode({"message"=>{"content"=>"No tool selected"},"done"=>.T.})
+                lContinue:=.F.
+                break
+            endif
+
+            if ((nTool:=aScan(oTAgent:aTools,{|x|Lower(allTrim(x[1]))==Lower(allTrim(cToolName))}))==0)
+                #ifdef DEBUG
+                    DispOut("DEBUG: Tool ","g+/n")
+                    ? "'"+cToolName+"' not found in agent '"+oTAgent:cCategory+"'",hb_eol()
+                #endif
+                self:cResponse:=hb_jsonEncode({"message"=>{"content"=>"Tool not found"},"done"=>.T.})
+                lContinue:=.F.
+                break
+            endif
+
+            cToolResult:=Eval(oTAgent:aTools[nTool][2],hToolInfo["params"])
+            #ifdef DEBUG
+                DispOut("DEBUG: Tool result: ","GR+/n")
+                ? cToolResult,hb_eol()
+            #endif
+            self:cResponse:=hb_jsonEncode({"message"=>{"content"=>cToolResult},"done"=>.T.})
+            lContinue:=.F.
+            break
+
+        end sequence
+
+        if (!lContinue)
+            break
+        endif
+
+        #ifdef DEBUG
+            DispOut("DEBUG: Calling OLLAMA API","g+/n")
+            ? hb_eol()
+        #endif
+
+        curl_easy_reset(self:phCurl)
+        curl_easy_setopt(self:phCurl,HB_CURLOPT_POST,.T.)
+        curl_easy_setopt(self:phCurl,HB_CURLOPT_URL,self:cUrl)
+        aHeaders:={"Content-Type: application/json"}
+        curl_easy_setopt(self:phCurl,HB_CURLOPT_HTTPHEADER,aHeaders)
+        curl_easy_setopt(self:phCurl,HB_CURLOPT_USERNAME,'')
+        curl_easy_setopt(self:phCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
+
+        hRequest["model"]:=self:cModel
+        hMessage["role"]:="user"
+        hMessage["content"]:=self:cPrompt
+        hRequest["messages"]:={hMessage}
+        hRequest["temperature"]:=0.5
+
+        if (!Empty(cImageFileName))
+            if (hb_FileExists(cImageFileName))
+                cBase64Image:=hb_base64Encode(hb_MemoRead(cImageFileName))
+                hMessage["images"]:={cBase64Image}
+            else
+                #ifdef DEBUG
+                    DispOut("DEBUG: Image not found: ","g+/n")
+                    ? cImageFileName,hb_eol()
+                #endif
+                self:cResponse:=hb_jsonEncode({"message"=>{"content"=>"Image '"+cImageFileName+"'not found"},"done"=>.T.})
+                break
+            endif
+        endif
+
+        if (bWriteFunction!=nil)
+            hRequest["stream"]:=.T.
+            curl_easy_setopt(self:phCurl,HB_CURLOPT_WRITEFUNCTION,bWriteFunction)
         else
-            Alert("Image " + cImageFileName + " not found")
-            return nil
+            hRequest["stream"]:=.F.
+            curl_easy_setopt(self:phCurl,HB_CURLOPT_DL_BUFF_SETUP)
         endif
-    endif
 
-    if bWriteFunction != nil
-        hRequest["stream"]:=.T.
-        curl_easy_setopt(::hCurl,HB_CURLOPT_WRITEFUNCTION,bWriteFunction)
-    else
-        hRequest["stream"]:=.F.
-        curl_easy_setopt(::hCurl,HB_CURLOPT_DL_BUFF_SETUP)
-    endif
+        cJSON:=hb_jsonEncode(hRequest)
+        curl_easy_setopt(self:phCurl,HB_CURLOPT_POSTFIELDS,cJSON)
 
-    cJson:=hb_jsonEncode(hRequest)
-    curl_easy_setopt(::hCurl,HB_CURLOPT_POSTFIELDS,cJson)
+        self:nError:=curl_easy_perform(self:phCurl)
+        curl_easy_getinfo(self:phCurl,HB_CURLINFO_RESPONSE_CODE,@self:nHttpCode)
 
-    ::nError:=curl_easy_perform(::hCurl)
-    curl_easy_getinfo(::hCurl,HB_CURLINFO_RESPONSE_CODE,@::nHttpCode)
-
-    if ::nError == HB_CURLE_OK
-        if bWriteFunction == nil
-            ::cResponse:=curl_easy_dl_buff_get(::hCurl)
+        if (self:nError==HB_CURLE_OK)
+            if (bWriteFunction==nil)
+                self:cResponse:=curl_easy_dl_buff_get(self:phCurl)
+            endif
+        else
+            self:cResponse:="Error code "+Str(self:nError)
         endif
-    else
-        ::cResponse:="Error code " + Str(::nError)
-    endif
-return ::cResponse
 
-METHOD End() CLASS TOLLama
-    curl_easy_cleanup(::hCurl)
-    ::hCurl:=nil
-return nil
+    end sequence
+
+    return(self:cResponse) as character
+
+METHOD PROCEDURE End() CLASS TOLLama
+    curl_easy_cleanup(self:phCurl)
+    curl_global_cleanup()
+    return
+
+METHOD AddAgent(oTAgent as object) CLASS TOLLama
+    aAdd(self:aAgents,oTAgent)
+    return(self) as object
 
 METHOD GetValue() CLASS TOLLama
-    local hResponse,uValue
-    hb_jsonDecode(::cResponse,@hResponse)
+
+    local hResponse as hash
+    local uValue as anytype
+
+    hb_jsonDecode(self:cResponse,@hResponse)
+
     TRY
         uValue:=hResponse["message"]["content"]
     CATCH
         uValue:=hResponse["error"]["message"]
     END
-return uValue
 
-METHOD AddAgent(oTAgent) CLASS TOLLama
-    aAdd(self:aAgents,oTAgent)
-    return(self)
+    return(uValue) as anytype
