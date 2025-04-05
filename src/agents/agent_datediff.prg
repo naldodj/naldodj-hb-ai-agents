@@ -61,6 +61,8 @@ __JSON_HTOOLS__
   - `date1 = today`s date or now`
 - Always use the format `"yyyy.mm.dd"` for dates (e.g., `"1970.12.15"`).
 - Only return a JSON object (no explanation or extra text).
+- Every tool **must** include all required parameters in the `"params"` object.
+- For `date_diff_*` tools, both `date1` and `date2` or `date` and `value` are **mandatory**.
 ---
 ### ✅ Expected Output Format:
 ```json
