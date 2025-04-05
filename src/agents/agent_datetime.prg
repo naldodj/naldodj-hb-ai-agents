@@ -56,7 +56,7 @@ Return only a JSON object:
     #pragma __endtext
 
     #pragma __cstream|cAgentPurpose:=%s
-The "agent_datetime" provides tools for retrieving the current date and time in various formats. It is designed to handle requests for the current time, date, or both, depending on the user's prompt.
+The "agent_datetime" provides tools for retrieving the current date and time in various formats. It is designed to handle requests for the current time, date, or both, depending on the user`s prompt.
     #pragma __endtext
 
     oTAgent:=TAgent():New("Agent_DateTime",cAgentPrompt,cAgentPurpose)
