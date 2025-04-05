@@ -3,6 +3,11 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-04 22:23 UTC naldodj
+  * src/core/tlmstudio.prg
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_ollama.exe
+
 2025-04-04 21:46 UTC naldodj
   * .gitignore
   * src/core/tlmstudio.prg
