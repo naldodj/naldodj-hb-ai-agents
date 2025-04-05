@@ -43,7 +43,12 @@ CLASS TLMStudio
 ENDCLASS
 
 METHOD New(cModel as character) CLASS TLMStudio
-    hb_default(@cModel,"qwen2.5-7b-instruct-1m"/*The best first:qwen2.5-7b-instruct-1m,gemma-3-4b-it*/)
+    /*
+        The best first:
+        qwen2.5-7b-instruct-1m
+        gemma-3-4b-it
+    */
+    hb_default(@cModel,"qwen2.5-7b-instruct-1m")
     self:cModel:=cModel
     self:cUrl:="http://127.0.0.1:1234/v1/chat/completions"
     curl_global_init()
@@ -105,12 +110,17 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
     nError:=curl_easy_perform(self:phCurl)
     if (nError==HB_CURLE_OK)
         cCategoryResponse:=curl_easy_dl_buff_get(self:phCurl)
-        hb_jsonDecode(cCategoryResponse,@hResponse)
-        cCategoryResponse:=hResponse["choices"][1]["message"]["content"]
-        #ifdef DEBUG
-            DispOut("DEBUG: Category returned by AI: ","g+/n")
-            ? cCategoryResponse,hb_eol()
-        #endif
+        //TODO: rever estre block TRY
+        TRY
+            hb_jsonDecode(cCategoryResponse,@hResponse)
+            cCategoryResponse:=hResponse["choices"][1]["message"]["content"]
+            #ifdef DEBUG
+                DispOut("DEBUG: Category returned by AI: ","g+/n")
+                ? cCategoryResponse,hb_eol()
+            #endif
+        CATCH
+            cCategoryResponse:=""
+        END TRY
     else
         cCategoryResponse:=""
     endif
@@ -178,29 +188,34 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLMStudio
     nError:=curl_easy_perform(self:phCurl)
     if (nError==HB_CURLE_OK)
         cToolResponse:=curl_easy_dl_buff_get(self:phCurl)
-        hb_jsonDecode(cToolResponse,@hResponse)
-        #ifdef DEBUG
-            DispOut("DEBUG: Raw response from AI: ","g+/n")
-            ? cToolResponse,hb_eol()
-            DispOut("DEBUG: hResponse after decoding: ","g+/n")
-            ? hb_jsonEncode(hResponse),hb_eol()
-            DispOut("DEBUG: Content of hResponse['choices'][1]['message']['content']:","g+/n")
-            ? hResponse["choices"][1]["message"]["content"],hb_eol()
-        #endif
-        hResponse["choices"][1]["message"]["content"]:=hb_StrReplace(hResponse["choices"][1]["message"]["content"],{"```json"=>"","```"=>""})
-        hb_jsonDecode(hResponse["choices"][1]["message"]["content"],@hToolInfo)
-        #ifdef DEBUG
-            DispOut("DEBUG: hToolInfo after processing:","g+/n")
-            ? hb_jsonEncode(hToolInfo),hb_eol()
-            DispOut("DEBUG: Type of hToolInfo:","g+/n")
-            ? ValType(hToolInfo),hb_eol()
-            if ValType(hToolInfo) == "H"
-                DispOut("DEBUG: Keys in hToolInfo:","g+/n")
-                ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
-            else
-                hToolInfo:={=>}
-            endif
-        #endif
+        //TODO: rever estre block TRY
+        TRY
+            hb_jsonDecode(cToolResponse,@hResponse)
+            #ifdef DEBUG
+                DispOut("DEBUG: Raw response from AI: ","g+/n")
+                ? cToolResponse,hb_eol()
+                DispOut("DEBUG: hResponse after decoding: ","g+/n")
+                ? hb_jsonEncode(hResponse),hb_eol()
+                DispOut("DEBUG: Content of hResponse['choices'][1]['message']['content']:","g+/n")
+                ? hResponse["choices"][1]["message"]["content"],hb_eol()
+            #endif
+            hResponse["choices"][1]["message"]["content"]:=hb_StrReplace(hResponse["choices"][1]["message"]["content"],{"```json"=>"","```"=>""})
+            hb_jsonDecode(hResponse["choices"][1]["message"]["content"],@hToolInfo)
+            #ifdef DEBUG
+                DispOut("DEBUG: hToolInfo after processing:","g+/n")
+                ? hb_jsonEncode(hToolInfo),hb_eol()
+                DispOut("DEBUG: Type of hToolInfo:","g+/n")
+                ? ValType(hToolInfo),hb_eol()
+                if (ValType(hToolInfo)=="H")
+                    DispOut("DEBUG: Keys in hToolInfo:","g+/n")
+                    ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
+                else
+                    hToolInfo:={=>}
+                endif
+            #endif
+        CATCH
+            hToolInfo:={=>}
+        END TRY
     else
         hToolInfo:={=>}
     endif
@@ -445,6 +460,7 @@ METHOD GetValue(cHKey as character) CLASS TLMStudio
     hb_default(@cHKey,"content")
 
     if (cHKey=="content")
+        //TODO: rever estre block TRY
         TRY
             uValue:=uValue["choices"][1]["message"]["content"]
         CATCH
@@ -455,9 +471,9 @@ METHOD GetValue(cHKey as character) CLASS TLMStudio
                     uValue:=uValue["error"]["message"]
                 CATCH
                     uValue:=uValue
-                END
-            END
-        END
+                END TRY
+            END TRY
+        END TRY
     endif
 
     TRY
@@ -468,6 +484,6 @@ METHOD GetValue(cHKey as character) CLASS TLMStudio
                 uValue:=uValue[cKey]
             endif
         next
-    END
+    END TRY
 
     return(uValue) as anytype

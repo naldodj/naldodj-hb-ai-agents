@@ -22,6 +22,8 @@ procedure Main()
 
     local cCDP as character
 
+    CLS
+
     #ifdef __ALT_D__    // Compile with -b -D__ALT_D__
         AltD(1)         // Enables the debugger. Press F5 to continue.
         AltD()          // Invokes the debugger
@@ -39,14 +41,21 @@ static procedure Execute()
 
     local aPrompts as array:=Array(0)
 
+    local cEoL as character:=hb_eol()
+    local cToday as character:=hb_DToC(Date(),"yyyy.mm.dd")
     local cPrompt as character
     local cResponse as character
+    local cSeparator as character:=Replicate("=",MaxCol())+cEoL
+
+    local hAgent
+    local hAgents as hash
 
     local nPrompt
 
     aAdd(aPrompts,"What the current 'time' is it?")
     aAdd(aPrompts,"What 'date' is Today?")
     aAdd(aPrompts,"What the current 'date and time' is it?")
+
     aAdd(aPrompts,"Create a folder named 'test'")
     aAdd(aPrompts,"Create a file called './test/test.txt'")
     aAdd(aPrompts,"Modify the file './test/test.txt' with content 'Hello World'")
@@ -58,53 +67,54 @@ static procedure Execute()
     aAdd(aPrompts,"What is 15 / 5?")
     aAdd(aPrompts,"What is (2 ^ 4)^2?")
 
-    aAdd(aPrompts,"Today is "+hb_DToC(Date(),"yyyy.mm.dd")+". How many days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today")
-    aAdd(aPrompts,"Today is "+hb_DToC(Date(),"yyyy.mm.dd")+". How many months have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
-    aAdd(aPrompts,"Today is "+hb_DToC(Date(),"yyyy.mm.dd")+". How many years have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
-    aAdd(aPrompts,"Today is "+hb_DToC(Date(),"yyyy.mm.dd")+". How many years, months, and days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
+    aAdd(aPrompts,"Today is "+cToday+". How many days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today")
+    aAdd(aPrompts,"Today is "+cToday+". How many months have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
+    aAdd(aPrompts,"Today is "+cToday+". How many years have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
+    aAdd(aPrompts,"Today is "+cToday+". How many years, months, and days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
 
-    aAdd(aPrompts,"What is date "+hb_DToC(Date(),"yyyy.mm.dd")+" + 10 days?")
-    aAdd(aPrompts,"What is date "+hb_DToC(Date(),"yyyy.mm.dd")+" - 10 days?")
-    aAdd(aPrompts,"What is date "+hb_DToC(Date(),"yyyy.mm.dd")+" + 10 months?")
-    aAdd(aPrompts,"What is date "+hb_DToC(Date(),"yyyy.mm.dd")+" - 10 months?")
-    aAdd(aPrompts,"What is date "+hb_DToC(Date(),"yyyy.mm.dd")+" + 10 years?")
-    aAdd(aPrompts,"What is date "+hb_DToC(Date(),"yyyy.mm.dd")+" - 10 years?")
+    aAdd(aPrompts,"What is date "+cToday+" + 10 days?")
+    aAdd(aPrompts,"What is date "+cToday+" - 10 days?")
+    aAdd(aPrompts,"What is date "+cToday+" + 10 months?")
+    aAdd(aPrompts,"What is date "+cToday+" - 10 months?")
+    aAdd(aPrompts,"What is date "+cToday+" + 10 years?")
+    aAdd(aPrompts,"What is date "+cToday+" - 10 years?")
+
+    hAgents:=hb_agents():Execute("GetAgents")
 
     WITH OBJECT TOLLama():New()
 
-        // Agent for showing the time
-        :AddAgent(Agent_DateTime():Execute("GetAgents"))
+        DispOut("DEBUG: Model: ","RB+/n")
+        ? :cModel,cEoL
 
-        // Agent for filesystem with multiple tools
-        :AddAgent(Agent_Filesystem():Execute("GetAgents"))
+        ? cSeparator
+        DispOut("DEBUG: Agents: ","RB+/n")
 
-        // Agent for math calculations
-        :AddAgent(Agent_Math():Execute("GetAgents"))
-
-        // Agent for Date operations
-        :AddAgent(Agent_DateDiff():Execute("GetAgents"))
+        for each hAgent in hAgents
+            ? hAgent:__enumKey()
+            :AddAgent(hAgent:__enumValue():Eval("GetAgents"))
+        next each //hAgent
 
         for nPrompt:=1 to Len(aPrompts)
             cPrompt:=aPrompts[nPrompt]
-            ? Replicate("=",MaxCol()),hb_eol()
+            ? cSeparator
             DispOut("DEBUG: Testing ","RB+/n")
-            ? cPrompt,hb_eol()
+            ? cPrompt,cEoL
             :Send(cPrompt)
         next nPrompt
 
         cPrompt:="What's the weather like?"
-        ? Replicate("=",MaxCol()),hb_eol()
+        ? cSeparator
         DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
+        ? cPrompt,cEoL
         :Send(cPrompt)
         cResponse:=:GetValue()
         DispOut("DEBUG: result: ","GR+/n")
         ? cResponse
 
         cPrompt:="What is Dom Pedro II's full name?"
-        ? Replicate("=",MaxCol()),hb_eol()
+        ? cSeparator
         DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,hb_eol()
+        ? cPrompt,cEoL
         :Send(cPrompt)
         cResponse:=:GetValue()
         DispOut("DEBUG: result: ","GR+/n")

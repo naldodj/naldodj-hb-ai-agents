@@ -74,14 +74,24 @@ The "agent_filesystem" provides tools for performing basic file system operation
     return(oTAgent) as object
 
 static function CreateFolder(hParams as hash)
+    local cDir as character
+    local cExt as character
+    local cDrive as character
     local cFolder as character
     local cMessage as character
+    local cFileName as character
     if (hb_HHasKey(hParams,"folder_name").and.!Empty(hParams["folder_name"]))
         cFolder:=hParams["folder_name"]
-        if (hb_DirExists(cFolder))
-            cMessage:="Folder '"+cFolder+"' already exists"
-        elseif (hb_DirCreate(cFolder)==0)
-            cMessage:="Folder '"+cFolder+"' created successfully"
+        hb_FNameSplit(cFolder,@cDir,@cFileName,@cExt,@cDrive)
+        if (Empty(cDir).and.Empty(cExt).and.Empty(cDrive))
+            if (Left(cFolder,2)!=Left(hb_DirSepAdd(".")+cFolder,2))
+                cFolder:=hb_DirSepAdd(".")+cFolder
+            endif
+        endif
+        if (hb_DirExists(cDrive+cFolder))
+            cMessage:="Folder '"+cDrive+cFolder+"' already exists"
+        elseif (hb_DirBuild(cDrive+cFolder).or.(hb_DirCreate(cDrive+cFolder)==0))
+            cMessage:="Folder '"+cDrive+cFolder+"' created successfully"
         else
             cMessage:="Failed to create folder: no name specified"
         endif
@@ -91,10 +101,23 @@ static function CreateFolder(hParams as hash)
     return(cMessage) as character
 
 static function CreateFile(hParams as hash)
+    local cDir as character
+    local cExt as character
     local cFile as character
+    local cDrive as character
     local cMessage as character
+    local cFileName as character
     if ((hb_HHasKey(hParams,"file_name").and.!Empty(hParams["file_name"])))
         cFile:=hParams["file_name"]
+        hb_FNameSplit(cFile,@cDir,@cFileName,@cExt,@cDrive)
+        if (Empty(cDrive))
+            if (Left(cFile,2)!=(hb_DirSepAdd(".")+cFile))
+                cFile:=(hb_DirSepAdd(".")+cFile)
+            endif
+        endif
+        if (!hb_DirExists(cDrive+cDir))
+            hb_DirBuild(cDrive+cDir)
+        endif
         if (hb_MemoWrit(cFile,""))
             cMessage:="File '"+cFile+"' created successfully"
         else
@@ -106,16 +129,29 @@ static function CreateFile(hParams as hash)
     return(cMessage) as character
 
 static function ModifyFile(hParams as hash)
+    local cDir as character
+    local cExt as character
     local cFile as character
-    local cContent as character
+    local cDrive as character
     local cMessage as character
+    local cContent as character
+    local cFileName as character
     if (;
         (hb_HHasKey(hParams,"file_name").and.!Empty(hParams["file_name"]));
         .and.;
         (hb_HHasKey(hParams,"content").and.!Empty(hParams["content"]));
       )
         cFile:=hParams["file_name"]
+        hb_FNameSplit(cFile,@cDir,@cFileName,@cExt,@cDrive)
+        if (Empty(cDrive))
+            if (Left(cFile,2)!=Left(hb_DirSepAdd(".")+cFile,2))
+                cFile:=(hb_DirSepAdd(".")+cFile)
+            endif
+        endif
         cContent:=hParams["content"]
+        if (!hb_DirExists(cDrive+cDir))
+            hb_DirBuild(cDrive+cDir)
+        endif
         if (hb_MemoWrit(cFile,cContent))
             cMessage:="File '"+cFile+"' modified with content: "+cContent
         else
@@ -127,10 +163,23 @@ static function ModifyFile(hParams as hash)
     return(cMessage) as character
 
 static function DeleteFile(hParams as hash)
+    local cDir as character
+    local cExt as character
     local cFile as character
+    local cDrive as character
     local cMessage as character
+    local cFileName as character
     if ((hb_HHasKey(hParams,"file_name").and.!Empty(hParams["file_name"])))
         cFile:=hParams["file_name"]
+        hb_FNameSplit(cFile,@cDir,@cFileName,@cExt,@cDrive)
+        if (Empty(cDrive))
+            if (Left(cFile,2)!=Left(hb_DirSepAdd(".")+cFile,2))
+                cFile:=(hb_DirSepAdd(".")+cFile)
+            endif
+        endif
+        if (!hb_DirExists(cDrive+cDir))
+            hb_DirBuild(cDrive+cDir)
+        endif
         if (hb_FileExists(cFile))
             if (fErase(cFile)==0)
                 cMessage:="File '"+cFile+"' deleted successfully"

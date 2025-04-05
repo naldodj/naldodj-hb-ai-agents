@@ -4,3 +4,4 @@ _commit.txt
 *.~pr
 src/tst/test.txt
 *.bak
+/src/hb_httpconnector

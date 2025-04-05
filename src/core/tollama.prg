@@ -43,7 +43,12 @@ CLASS TOLLama
 ENDCLASS
 
 METHOD New(cModel as character) CLASS TOLLama
-    hb_default(@cModel,"gemma3")
+    /*
+        The Best First:
+        hf.co/lmstudio-community/Qwen2.5-7B-Instruct-1M-GGUF:Q8_0/Qwen2.5-7B-Instruct-1M-GGUF
+        gemma3
+    */
+    hb_default(@cModel,"hf.co/lmstudio-community/Qwen2.5-7B-Instruct-1M-GGUF:Q8_0")
     self:cModel:=cModel
     self:cUrl:="http://localhost:11434/api/chat"
     curl_global_init()
@@ -104,12 +109,16 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
     nError:=curl_easy_perform(self:phCurl)
     if (nError==HB_CURLE_OK)
         cCategoryResponse:=curl_easy_dl_buff_get(self:phCurl)
-        hb_jsonDecode(cCategoryResponse,@hResponse)
-        cCategoryResponse:=hResponse["message"]["content"]
-        #ifdef DEBUG
-            DispOut("DEBUG: Category returned by AI: ","g+/n")
-            ? cCategoryResponse,hb_eol()
-        #endif
+        TRY
+            hb_jsonDecode(cCategoryResponse,@hResponse)
+            cCategoryResponse:=hResponse["message"]["content"]
+            #ifdef DEBUG
+                DispOut("DEBUG: Category returned by AI: ","g+/n")
+                ? cCategoryResponse,hb_eol()
+            #endif
+        CATCH
+            cCategoryResponse:=""
+        END TRY
     else
         cCategoryResponse:=""
     endif
@@ -177,29 +186,34 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TOLLama
     nError:=curl_easy_perform(self:phCurl)
     if (nError==HB_CURLE_OK)
         cToolResponse:=curl_easy_dl_buff_get(self:phCurl)
-        hb_jsonDecode(cToolResponse,@hResponse)
-        #ifdef DEBUG
-            DispOut("DEBUG: Raw response from AI: ","g+/n")
-            ? cToolResponse,hb_eol()
-            DispOut("DEBUG: hResponse after decoding: ","g+/n")
-            ? hb_jsonEncode(hResponse),hb_eol()
-            DispOut("DEBUG: Content of hResponse['message']['content']:","g+/n")
-            ? hResponse["message"]["content"],hb_eol()
-        #endif
-        hResponse["message"]["content"]:=hb_StrReplace(hResponse["message"]["content"],{"```json"=>"","```"=>""})
-        hb_jsonDecode(hResponse["message"]["content"],@hToolInfo)
-        #ifdef DEBUG
-            DispOut("DEBUG: hToolInfo after processing:","g+/n")
-            ? hb_jsonEncode(hToolInfo),hb_eol()
-            DispOut("DEBUG: Type of hToolInfo:","g+/n")
-            ? ValType(hToolInfo),hb_eol()
-            if ValType(hToolInfo) == "H"
-                DispOut("DEBUG: Keys in hToolInfo:","g+/n")
-                ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
-            else
-                hToolInfo:={=>}
-            endif
-        #endif
+        //TODO: rever estre block TRY
+        TRY
+            hb_jsonDecode(cToolResponse,@hResponse)
+            #ifdef DEBUG
+                DispOut("DEBUG: Raw response from AI: ","g+/n")
+                ? cToolResponse,hb_eol()
+                DispOut("DEBUG: hResponse after decoding: ","g+/n")
+                ? hb_jsonEncode(hResponse),hb_eol()
+                DispOut("DEBUG: Content of hResponse['message']['content']:","g+/n")
+                ? hResponse["message"]["content"],hb_eol()
+            #endif
+            hResponse["message"]["content"]:=hb_StrReplace(hResponse["message"]["content"],{"```json"=>"","```"=>""})
+            hb_jsonDecode(hResponse["message"]["content"],@hToolInfo)
+            #ifdef DEBUG
+                DispOut("DEBUG: hToolInfo after processing:","g+/n")
+                ? hb_jsonEncode(hToolInfo),hb_eol()
+                DispOut("DEBUG: Type of hToolInfo:","g+/n")
+                ? ValType(hToolInfo),hb_eol()
+                if ValType(hToolInfo) == "H"
+                    DispOut("DEBUG: Keys in hToolInfo:","g+/n")
+                    ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
+                else
+                    hToolInfo:={=>}
+                endif
+            #endif
+        CATCH
+            hToolInfo:={=>}
+        END TRY
     else
         hToolInfo:={=>}
     endif
@@ -444,6 +458,6 @@ METHOD GetValue() CLASS TOLLama
         uValue:=hResponse["message"]["content"]
     CATCH
         uValue:=hResponse["error"]["message"]
-    END
+    END TRY
 
     return(uValue) as anytype
