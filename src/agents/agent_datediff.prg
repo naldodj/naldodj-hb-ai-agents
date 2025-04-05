@@ -36,33 +36,78 @@ static function GetAgents()
     local hParameters as hash
 
     #pragma __cstream|cAgentPrompt:=%s
-**Prompt:** Based on `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, choose the best matching tool from:
+**Prompt:**
+Based on the user prompt `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, choose the tool that best matches the **date-related operation** described.
+Available tools:
 ```json
 __JSON_HTOOLS__
 ```
-### Tool Options:
-- `date_diff_day`: days between two dates.
-- `date_diff_month`: months between two dates.
-- `date_diff_year`: years between two dates.
-- `date_diff_year_month_day`: years, months, and days between two dates.
-- `date_add_day`: add days to a date.
-- `date_add_month`: add months to a date.
-- `date_add_year`: add years to a date.
-- `date_subtract_day`: subtract days from a date.
-- `date_subtract_month`: subtract months from a date.
-- `date_subtract_year`: subtract years from a date.
-### Rules:
-- For historical events, use the event date as `date2` and today’s date as `date1`.
-- Use date format `"yyyy.mm.dd"` (e.g., 15/12/1970 → "1970.12.15").
-### Output:
-Return only a JSON object:
+---
+### 🛠️ Tool Descriptions:
+- `date_diff_day`: Calculate the **number of days** between two dates.
+- `date_diff_month`: Calculate the **number of full months** between two dates.
+- `date_diff_year`: Calculate the **number of full years** between two dates.
+- `date_diff_year_month_day`: Calculate the **full difference in years, months, and days** between two dates.
+- `date_add_day`: Add a **number of days** to a specific date.
+- `date_add_month`: Add a **number of months** to a specific date.
+- `date_add_year`: Add a **number of years** to a specific date.
+- `date_subtract_day`: Subtract a **number of days** from a specific date.
+- `date_subtract_month`: Subtract a **number of months** from a specific date.
+- `date_subtract_year`: Subtract a **number of years** from a specific date.
+---
+### 🧠 Interpretation Rules:
+- If the prompt is about how much time has passed since an event, assume:
+  - `date2 = event date`
+  - `date1 = today's date or now`
+- Always use the format `"yyyy.mm.dd"` for dates (e.g., `"1970.12.15"`).
+- Only return a JSON object (no explanation or extra text).
+---
+### ✅ Expected Output Format:
 ```json
 {"tool":"<tool_name>","params":{...}}
 ```
-### Examples:
-- “How many days since...” → `date_diff_day`
-- “What is 2025.03.01 + 10 days?” → `date_add_day`
-- “What is 2025.03.01 - 10 years?” → `date_subtract_year`
+---
+### 🔍 JSON Examples:
+```json
+{"tool":"date_diff_day","params":{"date1":"2025.04.04","date2":"1970.12.15"}}
+{"tool":"date_diff_month","params":{"date1":"2025.04.04","date2":"1970.12.15"}}
+{"tool":"date_diff_year","params":{"date1":"2025.04.04","date2":"1970.12.15"}}
+{"tool":"date_diff_year_month_day","params":{"date1":"2025.04.04","date2":"1970.12.15"}}
+
+{"tool":"date_add_day","params":{"date":"2025.03.01","value":10}}
+{"tool":"date_add_month","params":{"date":"2025.03.01","value":10}}
+{"tool":"date_add_year","params":{"date":"2025.03.01","value":10}}
+
+{"tool":"date_subtract_day","params":{"date":"2025.03.01","value":10}}
+{"tool":"date_subtract_month","params":{"date":"2025.03.01","value":10}}
+{"tool":"date_subtract_year","params":{"date":"2025.03.01","value":10}}
+```
+---
+### 💡 Examples of prompt-to-tool mapping:
+| User Prompt                                      | Expected Tool              |Contains Operator          |
+|--------------------------------------------------|----------------------------|---------------------------|
+| "How many days since 15/12/1970?"                | `date_diff_day`            |                           |
+| "How many months between 1970.12.15 and today?"  | `date_diff_month`          |                           |
+| "How many years since 1970.12.15?"               | `date_diff_year`           |                           |
+| "Time difference from 1970.12.15 to 2025.04.04?" | `date_diff_year_month_day` |                           |
+| "Add 10 days to 2025.03.01"                      | `date_add_day`             |`(+) add`                  |
+| "What is date 01/03/2025 + 10 days?"             | `date_add_day`             |`(+) add`                  |
+| "01/03/2025 + 10 days"                           | `date_add_day`             |`(+) add`                  |
+| "Add 10 months to 2025.03.01"                    | `date_add_month`           |`(+) add`                  |
+| "What is date 01/03/2025 + 10 months?"           | `date_add_month`           |`(+) add`                  |
+| "01/03/2025 + 10 months"                         | `date_add_month`           |`(+) add`                  |
+| "Add 10 years to 2025.03.01"                     | `date_add_year`            |`(+) add`                  |
+| "What is date 01/03/2025 + 10 years?"            | `date_add_year`            |`(+) add`                  |
+| "01/03/2025 + 10 years"                          | `date_add_year`            |`(+) add`                  |
+| "Subtract 10 days from 2025.03.01"               | `date_subtract_day`        |`(-) subtract and day(s)`  |
+| "What is date 01/03/2025 - 10 days?"             | `date_subtract_day`        |`(-) subtract and day(s)`  |
+| "01/03/2025 - 10 days"                           | `date_subtract_day`        |`(-) subtract and day(s)`  |
+| "Subtract 10 months from 2025.03.01"             | `date_subtract_month`      |`(-) subtract and month(s)`|
+| "What is date 01/03/2025 - 10 months?"           | `date_subtract_month`      |`(-) subtract and month(s)`|
+| "01/03/2025 - 10 months"                         | `date_subtract_month`      |`(-) subtract and month(s)`|
+| "Subtract 10 years from 2025.03.01"              | `date_subtract_year`       |`(-) subtract and year(s)` |
+| "What is date 01/03/2025 - 10 years?"            | `date_subtract_year`       |`(-) subtract and year(s)` |
+| "01/03/2025 - 10 years"                          | `date_subtract_year`       |`(-) subtract and year(s)` |
     #pragma __endtext
 
     #pragma __cstream|cAgentPurpose:=%s
@@ -89,6 +134,8 @@ The "agent_datediff" provides tools for performing various date calculations,inc
 
 static function __DateDiffDay(hParams as hash)
 
+    local cDate1 as character
+    local cDate2 as character
     local cMessage as character
 
     local dDate1 as date
@@ -101,15 +148,17 @@ static function __DateDiffDay(hParams as hash)
             .and.;
             (hb_HHasKey(hParams,"date2").and.!Empty(hParams["date2"]));
         )
-        if ("today"$Lower(hParams["date1"]))
+        cDate1:=Lower(hParams["date1"])
+        if (("today"$cDate1).or.("now"$cDate1))
             dDate1:=Date()
         else
-            dDate1:=hb_CToD(hParams["date1"],"yyyy.mm.dd")
+            dDate1:=hb_CToD(cDate1,"yyyy.mm.dd")
         endif
-        if ("today"$Lower(hParams["date2"]))
+        cDate2:=Lower(hParams["date2"])
+        if (("today"$cDate2).or.("now"$cDate2))
             dDate2:=Date()
         else
-            dDate2:=hb_CToD(hParams["date2"],"yyyy.mm.dd")
+            dDate2:=hb_CToD(cDate2,"yyyy.mm.dd")
         endif
         nDiffDay:=DateDiffDay(@dDate1,@dDate2)
         cMessage:="The difference,in days,between the dates "+hb_DToC(dDate1,"yyyy.mm.dd")+" and "+hb_DToC(dDate2,"yyyy.mm.dd")+" is: "+hb_NToC(nDiffDay)
@@ -121,6 +170,8 @@ static function __DateDiffDay(hParams as hash)
 
 static function __DateDiffMonth(hParams as hash)
 
+    local cDate1 as character
+    local cDate2 as character
     local cMessage as character
 
     local dDate1 as date
@@ -133,15 +184,17 @@ static function __DateDiffMonth(hParams as hash)
             .and.;
             (hb_HHasKey(hParams,"date2").and.!Empty(hParams["date2"]));
         )
-        if ("today"$Lower(hParams["date1"]))
+        cDate1:=Lower(hParams["date1"])
+        if (("today"$cDate1).or.("now"$cDate1))
             dDate1:=Date()
         else
-            dDate1:=hb_CToD(hParams["date1"],"yyyy.mm.dd")
+            dDate1:=hb_CToD(cDate1,"yyyy.mm.dd")
         endif
-        if ("today"$Lower(hParams["date2"]))
+        cDate2:=Lower(hParams["date2"])
+        if (("today"$cDate2).or.("now"$cDate2))
             dDate2:=Date()
         else
-            dDate2:=hb_CToD(hParams["date2"],"yyyy.mm.dd")
+            dDate2:=hb_CToD(cDate2,"yyyy.mm.dd")
         endif
         nDiffMonth:=DateDiffMonth(@dDate1,@dDate2)
         cMessage:="The difference,in months,between the dates "+hb_DToC(dDate1,"yyyy.mm.dd")+" and "+hb_DToC(dDate2,"yyyy.mm.dd")+" is: "+hb_NToC(nDiffMonth)
@@ -153,6 +206,8 @@ static function __DateDiffMonth(hParams as hash)
 
 static function __DateDiffYear(hParams as hash)
 
+    local cDate1 as character
+    local cDate2 as character
     local cMessage as character
 
     local dDate1 as date
@@ -165,15 +220,17 @@ static function __DateDiffYear(hParams as hash)
             .and.;
             (hb_HHasKey(hParams,"date2").and.!Empty(hParams["date2"]));
         )
-        if ("today"$Lower(hParams["date1"]))
+        cDate1:=Lower(hParams["date1"])
+        if (("today"$cDate1).or.("now"$cDate1))
             dDate1:=Date()
         else
-            dDate1:=hb_CToD(hParams["date1"],"yyyy.mm.dd")
+            dDate1:=hb_CToD(cDate1,"yyyy.mm.dd")
         endif
-        if ("today"$Lower(hParams["date2"]))
+        cDate2:=Lower(hParams["date2"])
+        if (("today"$cDate2).or.("now"$cDate2))
             dDate2:=Date()
         else
-            dDate2:=hb_CToD(hParams["date2"],"yyyy.mm.dd")
+            dDate2:=hb_CToD(cDate2,"yyyy.mm.dd")
         endif
         nDiffYear:=DateDiffYear(@dDate1,@dDate2)
         cMessage:="The difference,in years,between the dates "+hb_DToC(dDate1,"yyyy.mm.dd")+" and "+hb_DToC(dDate2,"yyyy.mm.dd")+" is: "+hb_NToC(nDiffYear)
@@ -185,6 +242,8 @@ static function __DateDiffYear(hParams as hash)
 
 static function __DateDiffYearMonthDay(hParams as hash)
 
+    local cDate1 as character
+    local cDate2 as character
     local cMessage as character
 
     local dDate1 as date
@@ -197,15 +256,17 @@ static function __DateDiffYearMonthDay(hParams as hash)
             .and.;
             (hb_HHasKey(hParams,"date2").and.!Empty(hParams["date2"]));
         )
-        if ("today"$Lower(hParams["date1"]))
+        cDate1:=Lower(hParams["date1"])
+        if (("today"$cDate1).or.("now"$cDate1))
             dDate1:=Date()
         else
-            dDate1:=hb_CToD(hParams["date1"],"yyyy.mm.dd")
+            dDate1:=hb_CToD(cDate1,"yyyy.mm.dd")
         endif
-        if ("today"$Lower(hParams["date2"]))
+        cDate2:=Lower(hParams["date2"])
+        if (("today"$cDate2).or.("now"$cDate2))
             dDate2:=Date()
         else
-            dDate2:=hb_CToD(hParams["date2"],"yyyy.mm.dd")
+            dDate2:=hb_CToD(cDate2,"yyyy.mm.dd")
         endif
         hDiffYearMonthDay:=DateDiffYearMonthDay(@dDate1,@dDate2)
         cMessage:="The difference,in years,months,and days,between the dates "+hb_DToC(dDate1,"yyyy.mm.dd")+" and "+;
@@ -356,30 +417,16 @@ static function __DateSubYear(hParams as hash)
 
 *******************************************************************************************************************************
 static function DateDiffDay(dDate1,dDate2)
-
-    local dTmp as date
-
-    if (dDate2>dDate1)
-        dTmp:=dDate2
-        dDate2:=dDate1
-        dDate1:=dTmp
-    endif
-
+    FixDateOrder(@dDate1,@dDate2)
     return((dDate1-dDate2)) as numeric
 
 static function DateDiffMonth(dDate1,dDate2)
-
-    local dTmp as date
 
     local nMonths as numeric
     local nMonth1 as numeric
     local nMonth2 as numeric
 
-    if (dDate2>dDate1)
-        dTmp:=dDate2
-        dDate2:=dDate1
-        dDate1:=dTmp
-    endif
+    FixDateOrder(@dDate1,@dDate2)
 
     nMonth1:=((Year(dDate1)*12)+Month(dDate1))
     nMonth2:=((Year(dDate2)*12)+Month(dDate2))
@@ -392,17 +439,11 @@ static function DateDiffMonth(dDate1,dDate2)
 
 static function DateDiffYear(dDate1 as date,dDate2 as date)
 
-    local dTmp as date
-
     local nMonth1 as numeric
     local nMonth2 as numeric
     local nDiffYear as numeric
 
-    if (dDate2>dDate1)
-        dTmp:=dDate2
-        dDate2:=dDate1
-        dDate2:=dTmp
-    endif
+    FixDateOrder(@dDate1,@dDate2)
 
     nMonth1:=((Year(dDate1)*12)+Month(dDate1))
     nMonth2:=((Year(dDate2)*12)+Month(dDate2))
@@ -469,3 +510,15 @@ static function DateAddYear(dDate,nYear)
 
 static function DateSubYear(dDate,nYear)
     return(AddMonth(dDate,-(nYear*12))) as date
+
+static procedure FixDateOrder(/*@*/dDate1,/*@*/dDate2)
+
+    local dTmp as date
+
+    if (dDate2>dDate1)
+        dTmp:=dDate2
+        dDate2:=dDate1
+        dDate1:=dTmp
+    endif
+
+    return

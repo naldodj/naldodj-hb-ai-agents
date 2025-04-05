@@ -43,7 +43,7 @@ CLASS TLMStudio
 ENDCLASS
 
 METHOD New(cModel as character) CLASS TLMStudio
-    hb_default(@cModel,"gemma-3-4b-it"/*qwen2.5-7b-instruct-1m*/)
+    hb_default(@cModel,"qwen2.5-7b-instruct-1m"/*gemma-3-4b-it*/)
     self:cModel:=cModel
     self:cUrl:="http://127.0.0.1:1234/v1/chat/completions"
     curl_global_init()

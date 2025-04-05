@@ -2,3 +2,5 @@
 _commit.txt
 /src/tst/test
 *.~pr
+src/tst/test.txt
+*.bak

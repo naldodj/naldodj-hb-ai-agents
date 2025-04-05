@@ -3,6 +3,15 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-04 21:46 UTC naldodj
+  * .gitignore
+  * src/core/tlmstudio.prg
+  * src/agents/agent_datediff.prg
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_lmstudio.prg
+  * src/tst/hb_agents_ollama.exe
+  * src/tst/hb_agents_ollama.prg
+
 2025-04-04 17:45 UTC naldodj (% Optimizations: Extensive changes applied — cleaned up, restructured, and enhanced core functionalities.)
   + src/tst/agent_datediff.prg
   + src/tst/hb_core_agents.hbp
