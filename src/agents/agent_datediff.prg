@@ -58,7 +58,7 @@ __JSON_HTOOLS__
 ### 🧠 Interpretation Rules:
 - If the prompt is about how much time has passed since an event, assume:
   - `date2 = event date`
-  - `date1 = today's date or now`
+  - `date1 = today`s date or now`
 - Always use the format `"yyyy.mm.dd"` for dates (e.g., `"1970.12.15"`).
 - Only return a JSON object (no explanation or extra text).
 ---
