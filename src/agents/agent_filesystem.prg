@@ -35,8 +35,11 @@ static function GetAgents()
 __JSON_HTOOLS__
 ```
 ### Rules:
+### Rules:
 - Each tool has specific required parameters (e.g., `create_folder` → `folder_name`, `modify_file` → `file_name`, `content`).
 - Extract values from the prompt and match them exactly to the expected parameter names.
+- **Do not alter file paths. Keep them exactly as they appear in the prompt.**
+  - Preserve full file paths exactly as provided in the prompt.
 - Do **not** use a generic `"params"` object with arbitrary keys.
 - Only include the parameters defined by the tool (or return an empty object if none are needed).
 ### Output:
@@ -74,6 +77,7 @@ The "agent_filesystem" provides tools for performing basic file system operation
     return(oTAgent) as object
 
 static function CreateFolder(hParams as hash)
+    local cPS as character
     local cDir as character
     local cExt as character
     local cDrive as character
@@ -84,8 +88,10 @@ static function CreateFolder(hParams as hash)
         cFolder:=hParams["folder_name"]
         hb_FNameSplit(cFolder,@cDir,@cFileName,@cExt,@cDrive)
         if (Empty(cDir).and.Empty(cExt).and.Empty(cDrive))
-            if (Left(cFolder,2)!=Left(hb_DirSepAdd(".")+cFolder,2))
-                cFolder:=hb_DirSepAdd(".")+cFolder
+            cPS:=hb_ps()
+            if (Left(cFolder,2)!=(Left("."+cPS+cFolder,2)))
+                cFolder:=("."+cPS+cFolder)
+                cFolder:=hb_StrReplace(cFolder,{cPS+cPS=>cPS})
             endif
         endif
         if (hb_DirExists(cDrive+cFolder))
@@ -101,6 +107,7 @@ static function CreateFolder(hParams as hash)
     return(cMessage) as character
 
 static function CreateFile(hParams as hash)
+    local cPS as character
     local cDir as character
     local cExt as character
     local cFile as character
@@ -111,8 +118,10 @@ static function CreateFile(hParams as hash)
         cFile:=hParams["file_name"]
         hb_FNameSplit(cFile,@cDir,@cFileName,@cExt,@cDrive)
         if (Empty(cDrive))
-            if (Left(cFile,2)!=(hb_DirSepAdd(".")+cFile))
-                cFile:=(hb_DirSepAdd(".")+cFile)
+            cPS:=hb_ps()
+            if (Left(cFile,2)!=(Left("."+cPS+cFile,2)))
+                cFile:=("."+cPS+cFile)
+                cFile:=hb_StrReplace(cFile,{cPS+cPS=>cPS})
             endif
         endif
         if (!hb_DirExists(cDrive+cDir))
@@ -129,6 +138,7 @@ static function CreateFile(hParams as hash)
     return(cMessage) as character
 
 static function ModifyFile(hParams as hash)
+    local cPS as character
     local cDir as character
     local cExt as character
     local cFile as character
@@ -144,8 +154,10 @@ static function ModifyFile(hParams as hash)
         cFile:=hParams["file_name"]
         hb_FNameSplit(cFile,@cDir,@cFileName,@cExt,@cDrive)
         if (Empty(cDrive))
-            if (Left(cFile,2)!=Left(hb_DirSepAdd(".")+cFile,2))
-                cFile:=(hb_DirSepAdd(".")+cFile)
+            cPS:=hb_ps()
+            if (Left(cFile,2)!=(Left("."+cPS+cFile,2)))
+                cFile:=("."+cPS+cFile)
+                cFile:=hb_StrReplace(cFile,{cPS+cPS=>cPS})
             endif
         endif
         cContent:=hParams["content"]
@@ -163,6 +175,7 @@ static function ModifyFile(hParams as hash)
     return(cMessage) as character
 
 static function DeleteFile(hParams as hash)
+    local cPS as character
     local cDir as character
     local cExt as character
     local cFile as character
@@ -173,8 +186,10 @@ static function DeleteFile(hParams as hash)
         cFile:=hParams["file_name"]
         hb_FNameSplit(cFile,@cDir,@cFileName,@cExt,@cDrive)
         if (Empty(cDrive))
-            if (Left(cFile,2)!=Left(hb_DirSepAdd(".")+cFile,2))
-                cFile:=(hb_DirSepAdd(".")+cFile)
+            cPS:=hb_ps()
+            if (Left(cFile,2)!=(Left("."+cPS+cFile,2)))
+                cFile:=("."+cPS+cFile)
+                cFile:=hb_StrReplace(cFile,{cPS+cPS=>cPS})
             endif
         endif
         if (!hb_DirExists(cDrive+cDir))
