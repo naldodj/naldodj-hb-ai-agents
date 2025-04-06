@@ -20,7 +20,12 @@ REQUEST HB_CODEPAGE_UTF8EX
 
 procedure Main()
 
+    local aModel as array
+    local aModels as array
+
     local cCDP as character
+    local cURL as character
+    local cModel as character
 
     CLS
 
@@ -31,97 +36,22 @@ procedure Main()
 
     cCDP:=hb_cdpSelect("UTF8EX")
 
-    Execute()
+    aModels:=Array(0)
+    /*The Best First:*/
+    aAdd(aModels,{"hf.co/lmstudio-community/Qwen2.5-7B-Instruct-1M-GGUF:Q8_0",.T.})
+    aAdd(aModels,{"gemma3",.T.})
+
+    cURL:="http://localhost:11434/api/chat"
+
+    for each aModel in aModels
+        if (aModel[2])
+            cModel:=aModel[1]
+            ExecutePrompts(cModel,cURL)
+        endif
+    next each //aModel
 
     hb_cdpSelect(cCDP)
 
     return
 
-static procedure Execute()
-
-    local aPrompts as array:=Array(0)
-
-    local cEoL as character:=hb_eol()
-    local cToday as character:=hb_DToC(Date(),"yyyy.mm.dd")
-    local cPrompt as character
-    local cResponse as character
-    local cSeparator as character:=Replicate("=",MaxCol())+cEoL
-
-    local hAgent
-    local hAgents as hash
-
-    local nPrompt
-
-    aAdd(aPrompts,"What the current 'time' is it?")
-    aAdd(aPrompts,"What 'date' is Today?")
-    aAdd(aPrompts,"What the current 'date and time' is it?")
-
-    aAdd(aPrompts,"Create a folder named 'test'")
-    aAdd(aPrompts,"Create a file called './test/test.txt'")
-    aAdd(aPrompts,"Modify the file './test/test.txt' with content 'Hello World'")
-    aAdd(aPrompts,"Delete the file './test/test.txt'")
-
-    aAdd(aPrompts,"What is 2 + 8?")
-    aAdd(aPrompts,"What is 10 - 2?")
-    aAdd(aPrompts,"What is 8 x 5?")
-    aAdd(aPrompts,"What is 15 / 5?")
-    aAdd(aPrompts,"What is (2 ^ 4)^2?")
-
-    aAdd(aPrompts,"Today is "+cToday+". How many days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today")
-    aAdd(aPrompts,"Today is "+cToday+". How many months have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
-    aAdd(aPrompts,"Today is "+cToday+". How many years have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
-    aAdd(aPrompts,"Today is "+cToday+". How many years, months, and days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today?")
-
-    aAdd(aPrompts,"What is date "+cToday+" + 10 days?")
-    aAdd(aPrompts,"What is date "+cToday+" - 10 days?")
-    aAdd(aPrompts,"What is date "+cToday+" + 10 months?")
-    aAdd(aPrompts,"What is date "+cToday+" - 10 months?")
-    aAdd(aPrompts,"What is date "+cToday+" + 10 years?")
-    aAdd(aPrompts,"What is date "+cToday+" - 10 years?")
-
-    hAgents:=hb_agents():Execute("GetAgents")
-
-    WITH OBJECT TOLLama():New()
-
-        DispOut("DEBUG: Model: ","RB+/n")
-        ? :cModel,cEoL
-
-        ? cSeparator
-        DispOut("DEBUG: Agents: ","RB+/n")
-
-        for each hAgent in hAgents
-            ? hAgent:__enumKey()
-            :AddAgent(hAgent:__enumValue():Eval("GetAgents"))
-        next each //hAgent
-
-        for nPrompt:=1 to Len(aPrompts)
-            cPrompt:=aPrompts[nPrompt]
-            ? cSeparator
-            DispOut("DEBUG: Testing ","RB+/n")
-            ? cPrompt,cEoL
-            :Send(cPrompt)
-        next nPrompt
-
-        cPrompt:="What's the weather like?"
-        ? cSeparator
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,cEoL
-        :Send(cPrompt)
-        cResponse:=:GetValue()
-        DispOut("DEBUG: result: ","GR+/n")
-        ? cResponse
-
-        cPrompt:="What is Dom Pedro II's full name?"
-        ? cSeparator
-        DispOut("DEBUG: Testing ","RB+/n")
-        ? cPrompt,cEoL
-        :Send(cPrompt)
-        cResponse:=:GetValue()
-        DispOut("DEBUG: result: ","GR+/n")
-        ? cResponse
-
-        :End()
-
-    END WITH
-
-    return
+#include "./hb_agents_prompts.prg"

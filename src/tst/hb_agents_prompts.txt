@@ -1,0 +1,20 @@
+I was born on 15/12/1970 on 21/02/2045 how old will I be?
+Eu nasci em 15/12/1970 em 21/02/2045 quantos anos terei?
+
+What the current 'time' is it?
+What 'date' is Today?
+What the current 'date and time' is it?
+
+Create a folder named 'test'
+Create a file called './test/test.txt'
+Modify the file './test/test.txt' with content 'Hello World'
+Delete the file './test/test.txt'
+
+What is 2 + 8?
+What is 10 - 2?
+What is 8 x 5?
+What is 15 / 5?
+What is (2 ^ 4^2?
+
+What's the weather like?
+What is Dom Pedro II's full name?
