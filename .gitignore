@@ -5,3 +5,4 @@ _commit.txt
 src/tst/test.txt
 *.bak
 /src/hb_httpconnector
+env_mk64.txt

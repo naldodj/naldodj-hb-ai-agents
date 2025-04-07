@@ -3,6 +3,9 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-07 18:53 UTC naldodj
+  * .gitignore
+
 2025-04-07 18:51 UTC naldodj
   + src/tst/compile.bat
   * src/core/tllm.prg
