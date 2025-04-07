@@ -458,7 +458,7 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
                 self:cResponse:=curl_easy_dl_buff_get(self:phCurl)
             endif
         else
-            self:cResponse:={"error"=>{"message"=>"Image '"+cImageFileName+"'not found"},"done"=>.T.}
+            self:cResponse:=hb_jsonEncode({"error"=>{"message"=>"Error in Send: "+hb_NToC(self:nError)},"done"=>.T.})
         endif
 
     end sequence

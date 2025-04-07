@@ -14,7 +14,34 @@ What is 2 + 8?
 What is 10 - 2?
 What is 8 x 5?
 What is 15 / 5?
-What is (2 ^ 4^2?
+What is (2 ^ 4)^2?
+
+What is the square root of 16?
+What is the Exponential of 8?
+What is the natural logarithm of 2.71828?
+What is the absolute value of -5?
+Round the number 15.75896521 to two decimal places
+What is the sine of 0?
+What is the cosine of 0?
+What is the Tangent of 1?
+What is the whole part of 15.25?
 
 What's the weather like?
 What is Dom Pedro II's full name?
+
+What is the floor of 3.7?
+What is the ceiling of 1.1?
+What is the sign of -4.5?
+What is the log base 10 of 100?
+What is the factorial of 5?
+What is the cotangent of PI/4?
+What is the arcsine of 1?
+What is the arccosine of 0?
+What is the arctangent of 1?
+What is the arctangent of y=3 and x=4?
+What is the hyperbolic sine of 1?
+What is the hyperbolic cosine of 0.5?
+What is the hyperbolic tangent of 2?
+What is 45 degrees converted to radians?
+What is PI radians converted to degrees?
+What is the value of pi?

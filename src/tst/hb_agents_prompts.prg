@@ -62,6 +62,10 @@ static procedure ExecutePrompts(cModel,cURL)
             DispOut("DEBUG Model: ["+cModel+"] Testing : ","RB+/n")
             ? cPrompt,cEoL
             :Send(cPrompt)
+            #ifndef DEBUG
+                cResponse:=:GetResponseValue()
+                ? cResponse
+            #endif
             if (:cCategory=="general")
                 cResponse:=:GetResponseValue()
                 DispOut("DEBUG Model: ["+cModel+"] result: ","GR+/n")
