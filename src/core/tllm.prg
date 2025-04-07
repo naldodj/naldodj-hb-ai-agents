@@ -16,7 +16,6 @@ Released to Public Domain.
 */
 #include "hbcurl.ch"
 #include "hbclass.ch"
-#include "hbcompat.ch"
 
 CLASS TLLM
 
@@ -76,20 +75,20 @@ METHOD GetResponseValue() CLASS TLLM
 
     hb_JSONDecode(self:cResponse,@self:hResponse)
 
-    //TODO: rever estre block TRY
-    TRY
+    //TODO: rever estre block BEGIN SEQUENCE WITH __BreakBlock()
+    BEGIN SEQUENCE WITH __BreakBlock()
         cValue:=self:hResponse["choices"][1]["message"]["content"]
-    CATCH
-        TRY
+    RECOVER
+        BEGIN SEQUENCE WITH __BreakBlock()
             cValue:=self:hResponse["message"]["content"]
-        CATCH
-            TRY
+        RECOVER
+            BEGIN SEQUENCE WITH __BreakBlock()
                 cValue:=self:hResponse["error"]["message"]
-            CATCH
+            RECOVER
                 cValue:=self:cResponse
-            END TRY
-        END TRY
-    END TRY
+            END SEQUENCE
+        END SEQUENCE
+    END SEQUENCE
 
     return(cValue) as character
 
@@ -147,8 +146,8 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLLM
     if (nError==HB_CURLE_OK)
         self:cResponse:=curl_easy_dl_buff_get(self:phCurl)
         cResponse:=self:GetResponseValue()
-        //TODO: rever estre block TRY
-        TRY
+        //TODO: rever estre block BEGIN SEQUENCE WITH __BreakBlock()
+        BEGIN SEQUENCE WITH __BreakBlock()
             cResponse:=hb_StrReplace(cResponse,{"```json"=>"","```"=>""})
             hb_jsonDecode(cResponse,@hToolInfo)
             #ifdef DEBUG
@@ -163,9 +162,9 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLLM
                     hToolInfo:={=>}
                 endif
             #endif
-        CATCH
+        RECOVER
             hToolInfo:={=>}
-        END TRY
+        END SEQUENCE
     else
         hToolInfo:={=>}
     endif
@@ -231,16 +230,16 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
     nError:=curl_easy_perform(self:phCurl)
     if (nError==HB_CURLE_OK)
         self:cResponse:=curl_easy_dl_buff_get(self:phCurl)
-        //TODO: rever estre block TRY
-        TRY
+        //TODO: rever estre block BEGIN SEQUENCE WITH __BreakBlock()
+        BEGIN SEQUENCE WITH __BreakBlock()
             self:cCategory:=self:GetResponseValue()
             #ifdef DEBUG
                 DispOut("DEBUG: Category returned by AI: ","g+/n")
                 ? self:cCategory,hb_eol()
             #endif
-        CATCH
+        RECOVER
             self:cResponse:=""
-        END TRY
+        END SEQUENCE
     else
         self:cResponse:=""
     endif
@@ -346,16 +345,16 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
                 ? hb_jsonEncode(hToolInfo),hb_eol()
             #endif
 
-            if ((ValType(hToolInfo)!="H").or.(!hb_HHasKey(hToolInfo,"tool")))
+            if ((ValType(hToolInfo)!="H").or.(!hb_HHasKey(hToolInfo,"tool").or.!hb_HHasKey(hToolInfo,"params")))
                 #ifdef DEBUG
-                    DispOut("DEBUG: Invalid response from GetToolName or missing 'tool'. Type: ","r+/n")
+                    DispOut("DEBUG: Invalid response from GetToolName or missing 'tool' or 'params'. Type: ","r+/n")
                     ? ValType(hToolInfo),hb_eol()
                     if (ValType(hToolInfo)=="H")
                         DispOut("DEBUG: Keys in hToolInfo: ","g+/n")
                         ? hb_JSONEncode(hb_HKeys(hToolInfo)),hb_eol()
                     endif
                 #endif
-                self:cResponse:=hb_jsonEncode({"message"=>{"content"=>"Invalid tool response"},"done"=>.T.})
+                self:cResponse:=hb_jsonEncode({"message"=>{"content"=>"Invalid 'tool' or 'params' response"},"done"=>.T.})
                 lContinue:=.F.
                 break
             endif

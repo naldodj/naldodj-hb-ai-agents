@@ -1,8 +1,11 @@
--w3 -es2
-
-xhb.hbc
 hbct.hbc
 hbtip.hbc
 hbssl.hbc
 hbcurl.hbc
 hbhttpd.hbc
+
+#Alternative solution to correctly obtain mathematical functions according to examples obtained in /hbct/tests/math.prg and /hbct/tests/test.prg.
+#How can I make the system recognize them without this?
+hbtest.hbc
+
+-w3 -es2 -lm

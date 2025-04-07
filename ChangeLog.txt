@@ -3,6 +3,16 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-07 18:51 UTC naldodj
+  + src/tst/compile.bat
+  * src/core/tllm.prg
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_ollama.exe
+  * src/tst/hb_core_agents.hbp
+  * src/agents/agent_math.prg
+  * src/tst/hb_agents_lmstudio.prg
+  * src/tst/hbmk.hbm
+
 2025-04-06 21:06 UTC naldodj
   * src/core/tllm.prg
   * src/tst/hb_agents_lmstudio.exe

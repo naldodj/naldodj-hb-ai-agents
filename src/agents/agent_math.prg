@@ -6,6 +6,8 @@
  \__,_| \__, | \___||_| |_| \__|   |_| |_| |_| \__,_| \__||_| |_|
         |___/
 
+Obs.: Extra math functions that require linking with -lm?
+
 Ref.: FiveTech Software tech support forums
 https://forums.fivetechsupport.com/viewtopic.php?t=45590&fbclid=IwY2xjawJabspleHRuA2FlbQIxMQABHfr9ZnmiZDE_sf1ZHzer4gx9RbwfpOb1xNSCqMlZuCmoEf4erO3UrABH9g_aem_IritY9uodOibezq_rQ8i1g
 
@@ -13,15 +15,24 @@ Released to Public Domain.
 --------------------------------------------------------------------------------------
 */
 
-#include "hbcompat.ch"
-#include "hb_namespace.ch"
-
 #require "hbct"
+
+/*
+  hbtest:
+  Alternative solution to correctly obtain mathematical functions according to examples obtained in /hbct/tests/math.prg and /hbct/tests/test.prg.
+  How can I make the system recognize them without this?
+*/
+#require "hbtest"
+
+#include "error.ch"
+#include "hb_namespace.ch"
 
 HB_NAMESPACE Agent_Math METHOD "GetAgents" POINTER @GetAgents(),;
                                "EvaluateExpression" POINTER @EvaluateExpression()
 
 static function GetAgents()
+
+    static st__lInitMathFunctions as logical:=.T.
 
     local oTAgent as object
 
@@ -29,6 +40,11 @@ static function GetAgents()
     local cAgentPurpose as character
 
     local hParameters as hash
+
+    if (st__lInitMathFunctions)
+        st__lInitMathFunctions:=.F.
+        InitMathFunctions()
+    endif
 
     #pragma __cstream|cAgentPrompt:=%s
 **Prompt:** Based on `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, select the best matching tool from:
@@ -135,14 +151,148 @@ The "agent_math" provides tools for performing basic mathematical operations by 
 static function EvaluateExpression(hParams as hash)
     local cMessage as character
     local cExpression as character
+    local oError as object
     if (hb_HHasKey(hParams,"expression").and.!Empty(hParams["expression"]))
         cExpression:=hb_StrReplace(hParams["expression"],{"x"=>"*","X"=>"*"})
-        TRY
+        BEGIN SEQUENCE WITH __BreakBlock()
             cMessage:="The result of "+cExpression+" is "+hb_NToC(&(cExpression))
-        CATCH
-            cMessage:="Failed to evaluate expression: no expression specified"
-        END TRY
+        RECOVER USING oError
+            cMessage:="Failed to evaluate expression."
+            #ifdef DEBUG
+              cMessage+=" Error: "+ErrorMessage(oError)
+            #endif
+        END SEQUENCE
     else
         cMessage:="Failed to evaluate expression: no expression specified"
     endif
     return(cMessage)
+
+static procedure InitMathFunctions()
+
+    local aFunc as array
+    local aMathFunc as array:=Array(0)
+
+    aAdd(aMathFunc,{@Pi(),{}})
+    aAdd(aMathFunc,{@Sin(),{1}})
+    aAdd(aMathFunc,{@aSin(),{1}})
+    aAdd(aMathFunc,{@Cos(),{1}})
+    aAdd(aMathFunc,{@aCos(),{1}})
+    aAdd(aMathFunc,{@Tan(),{1}})
+    aAdd(aMathFunc,{@aTan(),{1}})
+    aAdd(aMathFunc,{@Cot(),{1}})
+    aAdd(aMathFunc,{@SinH(),{1}})
+    aAdd(aMathFunc,{@CosH(),{1}})
+    aAdd(aMathFunc,{@TanH(),{1}})
+    aAdd(aMathFunc,{@DToR(),{1}})
+    aAdd(aMathFunc,{@RToD(),{1}})
+    aAdd(aMathFunc,{@Atn2(),{1,1}})
+    aAdd(aMathFunc,{@Floor(),{1}})
+    aAdd(aMathFunc,{@Ceiling(),{1}})
+    aAdd(aMathFunc,{@Log10(),{1}})
+    aAdd(aMathFunc,{@Sign(),{1}})
+    aAdd(aMathFunc,{@Fact(),{1}})
+
+    for each aFunc in aMathFunc
+        hb_ExecFromArray(aFunc)
+    next aFunc
+
+return
+
+STATIC FUNCTION ErrorMessage( oError as object )
+
+    LOCAL cMessage as character := ""
+    LOCAL tmp as anytype
+
+    IF ValType( oError:severity ) == "N"
+        DO CASE
+            CASE oError:severity == ES_WHOCARES     ; cMessage += "M "
+            CASE oError:severity == ES_WARNING      ; cMessage += "W "
+            CASE oError:severity == ES_ERROR        ; cMessage += "E "
+            CASE oError:severity == ES_CATASTROPHIC ; cMessage += "C "
+        ENDCASE
+    ENDIF
+
+    IF ValType( oError:genCode ) == "N"
+        cMessage += LTrim( Str( oError:genCode ) ) + " "
+    ENDIF
+
+    IF ValType( oError:subsystem ) == "C"
+        cMessage += oError:subsystem + " "
+    ENDIF
+
+    IF ValType( oError:subCode ) == "N"
+        cMessage += LTrim( Str( oError:subCode ) ) + " "
+    ENDIF
+
+    IF ValType( oError:description ) == "C"
+        cMessage += oError:description + " "
+    ENDIF
+
+    IF ! Empty( oError:operation )
+        cMessage += "(" + oError:operation + ") "
+    ENDIF
+
+    IF ! Empty( oError:filename )
+        cMessage += "<" + oError:filename + "> "
+    ENDIF
+
+    IF ValType( oError:osCode ) == "N"
+        cMessage += "OS:" + LTrim( Str( oError:osCode ) ) + " "
+    ENDIF
+
+    IF ValType( oError:tries ) == "N"
+        cMessage += "#:" + LTrim( Str( oError:tries ) ) + " "
+    ENDIF
+
+    IF ValType( oError:Args ) == "A"
+        cMessage += "A:" + LTrim( Str( Len( oError:Args ) ) ) + ":"
+        FOR tmp := 1 TO Len( oError:Args )
+            cMessage += ValType( oError:Args[ tmp ] ) + ":" + XToStrE( oError:Args[ tmp ] )
+            IF tmp < Len( oError:Args )
+                cMessage += ";"
+            ENDIF
+        NEXT
+        cMessage += " "
+    ENDIF
+
+    IF oError:canDefault .OR. ;
+       oError:canRetry .OR. ;
+       oError:canSubstitute
+
+        cMessage += "F:"
+        IF oError:canDefault
+            cMessage += "D"
+        ENDIF
+        IF oError:canRetry
+            cMessage += "R"
+        ENDIF
+        IF oError:canSubstitute
+            cMessage += "S"
+        ENDIF
+    ENDIF
+
+    RETURN( cMessage ) as character
+
+STATIC FUNCTION XToStrE( xValue as anytype )
+
+    LOCAL cType as character := ValType( xValue  )
+
+    DO CASE
+        CASE cType == "C"
+            xValue := StrTran( xValue, Chr( 0 ), '" + Chr( 0 ) + "' )
+            xValue := StrTran( xValue, Chr( 9 ), '" + Chr( 9 ) + "' )
+            xValue := StrTran( xValue, Chr( 10 ), '" + Chr( 10 ) + "' )
+            xValue := StrTran( xValue, Chr( 13 ), '" + Chr( 13 ) + "' )
+            xValue := StrTran( xValue, Chr( 26 ), '" + Chr( 26 ) + "' )
+            RETURN xValue
+        CASE cType == "N" ; RETURN LTrim( Str( xValue ) )
+        CASE cType == "D" ; RETURN "0d" + iif( Empty( xValue ), "0", DToS( xValue ) )
+        CASE cType == "L" ; RETURN iif( xValue, ".T.", ".F." )
+        CASE cType == "O" ; RETURN xValue:className() + " Object"
+        CASE cType == "U" ; RETURN "NIL"
+        CASE cType == "B" ; RETURN "{||...}"
+        CASE cType == "A" ; RETURN "{.[" + LTrim( Str( Len( xValue ) ) ) + "].}"
+        CASE cType == "M" ; RETURN "M:" + xValue
+    ENDCASE
+
+    RETURN ""

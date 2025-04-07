@@ -14,6 +14,8 @@ Released to Public Domain.
 
 */
 
+#require "hbct"
+
 REQUEST HB_CODEPAGE_UTF8EX
 
 // Enable debugging (hbmk2 -DDEBUG)
