@@ -65,7 +65,7 @@ __JSON_HTOOLS__
     * Calculates the natural logarithm (base e) of a number. Example: LOG(2.71828) returns approximately 1.
   - "absolute value of" → "ABS(number)"
     * Returns the absolute value of a number. Example: ABS(-5) returns 5.
-  - "round" + "with" + "decimal places" → "ROUND(number, number_precision)"
+  - "round"+"with"+"decimal places" → "ROUND(number, number_precision)"
     * Rounds a number to d decimal places. Example: ROUND(3.14159, 2) returns 3.14.
   - "sine of" → "SIN(number)"
     * Calculates the sine of an angle in radians. Example: SIN(0) returns 0.
@@ -103,7 +103,7 @@ __JSON_HTOOLS__
     * Calculates the arccosine (inverse cosine) in radians. Example: ACOS(0.0) returns PI()/2.
   - "arctangent of" → "ATAN(number)"
     * Calculates the arctangent (inverse tangent) in radians. Example: ATAN(0.0) returns 0.0.
-  - "arctangent of" + "with y,x" → "ATN2(y, x)"
+  - "arctangent of"+"with y,x" → "ATN2(y, x)"
     * Calculates the arctangent of y/x, considering the quadrant. Example: ATN2(0.0, 1.0) returns 0.0.
   - "hyperbolic sine of" → "SINH(number)"
     * Calculates the hyperbolic sine of a number. Example: SINH(0.0) returns 0.0.
@@ -117,6 +117,18 @@ __JSON_HTOOLS__
     * Converts degrees to radians. Example: DTOR(180.0) returns PI().
   - "pi" → "PI()"
     * Returns the mathematical constant π (approximately 3.14159).
+  - "exponent" → "Exponent(<nFloatingPointNumber>)"
+    * Returns the exponent of the <nFloatingPointNumber> number in base 2
+    - This function supplements Mantissa() to return the exponent of the <nFloatingPointNumber> number.
+        Values > 1 or values < -1 return a positive number 0 to 1023.
+        Values < 1 or values > -1 return a negative number -1 to -1023.
+        The Exponent( 0 ), return 0.
+        The following calculation reproduces the original value:
+        Example: 2^Exponent(<nFloatingPointNumber>) * Mantissa(<nFloatingPointNumber>) = <nFloatingPointNumber>
+  - "mantissa" → "Mantissa(<nFloatingPointNumber>)"
+    * Returns the mantissa of the <nFloatingPointNumber> number.
+        - This function supplements Exponent() to return the mantissa of the <nFloatingPointNumber> number.
+            Example: Mantissa( <nFloatingPointNumber> ) * 2 ^ Exponent( <nFloatingPointNumber> ) = <nFloatingPointNumber>
 - Extract numbers from the prompt.
 ### Output:
 Return only a JSON object:
@@ -124,7 +136,7 @@ Return only a JSON object:
 {"tool":"<tool_name>","params":{"<param_name>":"<value>"}}
 ```
 ### Examples:
-- "What is 2 + 2?" →
+- "What is 2+2?" →
   ```json
   {"tool":"evaluate","params":{"expression":"2+2"}}
   ```
@@ -172,127 +184,168 @@ static procedure InitMathFunctions()
     local aFunc as array
     local aMathFunc as array:=Array(0)
 
-    aAdd(aMathFunc,{@Pi(),{}})
-    aAdd(aMathFunc,{@Sin(),{1}})
-    aAdd(aMathFunc,{@aSin(),{1}})
-    aAdd(aMathFunc,{@Cos(),{1}})
     aAdd(aMathFunc,{@aCos(),{1}})
-    aAdd(aMathFunc,{@Tan(),{1}})
+    aAdd(aMathFunc,{@aSin(),{1}})
     aAdd(aMathFunc,{@aTan(),{1}})
-    aAdd(aMathFunc,{@Cot(),{1}})
-    aAdd(aMathFunc,{@SinH(),{1}})
-    aAdd(aMathFunc,{@CosH(),{1}})
-    aAdd(aMathFunc,{@TanH(),{1}})
-    aAdd(aMathFunc,{@DToR(),{1}})
-    aAdd(aMathFunc,{@RToD(),{1}})
-    aAdd(aMathFunc,{@Atn2(),{1,1}})
-    aAdd(aMathFunc,{@Floor(),{1}})
+    aAdd(aMathFunc,{@aTn2(),{1,1}})
     aAdd(aMathFunc,{@Ceiling(),{1}})
-    aAdd(aMathFunc,{@Log10(),{1}})
-    aAdd(aMathFunc,{@Sign(),{1}})
+    aAdd(aMathFunc,{@CoS(),{1}})
+    aAdd(aMathFunc,{@CoSH(),{1}})
+    aAdd(aMathFunc,{@CoT(),{1}})
+    aAdd(aMathFunc,{@DToR(),{1}})
+    aAdd(aMathFunc,{@Exp(),{1}})
+    aAdd(aMathFunc,{@Exponent(),{1}})
     aAdd(aMathFunc,{@Fact(),{1}})
+    aAdd(aMathFunc,{@Floor(),{1}})
+    aAdd(aMathFunc,{@Log10(),{1}})
+    aAdd(aMathFunc,{@Mantissa(),{1}})
+    aAdd(aMathFunc,{@Pi(),{}})
+    aAdd(aMathFunc,{@RToD(),{1}})
+    aAdd(aMathFunc,{@Sign(),{1}})
+    aAdd(aMathFunc,{@Sin(),{1}})
+    aAdd(aMathFunc,{@SinH(),{1}})
+    aAdd(aMathFunc,{@Tan(),{1}})
+    aAdd(aMathFunc,{@TanH(),{1}})
 
     for each aFunc in aMathFunc
-        hb_ExecFromArray(aFunc)
+        BEGIN SEQUENCE WITH __BreakBlock()
+            hb_ExecFromArray(aFunc)
+        END SEQUENCE
     next aFunc
 
 return
 
-STATIC FUNCTION ErrorMessage( oError as object )
+static function ErrorMessage(oError as object)
 
-    LOCAL cMessage as character := ""
-    LOCAL tmp as anytype
+    local cMessage as character:=""
 
-    IF ValType( oError:severity ) == "N"
-        DO CASE
-            CASE oError:severity == ES_WHOCARES     ; cMessage += "M "
-            CASE oError:severity == ES_WARNING      ; cMessage += "W "
-            CASE oError:severity == ES_ERROR        ; cMessage += "E "
-            CASE oError:severity == ES_CATASTROPHIC ; cMessage += "C "
-        ENDCASE
-    ENDIF
+    local nArgs as numeric
 
-    IF ValType( oError:genCode ) == "N"
-        cMessage += LTrim( Str( oError:genCode ) ) + " "
-    ENDIF
+    local tmp as anytype
 
-    IF ValType( oError:subsystem ) == "C"
-        cMessage += oError:subsystem + " "
-    ENDIF
+    if (ValType(oError:severity)=="N")
+        switch oError:severity
+            case ES_WHOCARES
+                cMessage+="M "
+                exit
+            case ES_WARNING
+                cMessage+="W "
+                exit
+            case ES_ERROR
+                cMessage+="E "
+                exit
+            case ES_CATASTROPHIC
+                cMessage+="C "
+                exit
+        end switch
+    endif
 
-    IF ValType( oError:subCode ) == "N"
-        cMessage += LTrim( Str( oError:subCode ) ) + " "
-    ENDIF
+    if (ValType( oError:genCode )=="N")
+        cMessage+=hb_NToC(oError:genCode)+" "
+    endif
 
-    IF ValType( oError:description ) == "C"
-        cMessage += oError:description + " "
-    ENDIF
+    if (ValType(oError:subsystem)=="C")
+        cMessage+=oError:subsystem+" "
+    endif
 
-    IF ! Empty( oError:operation )
-        cMessage += "(" + oError:operation + ") "
-    ENDIF
+    if (ValType(oError:subCode)=="N")
+        cMessage+=hb_NToC(oError:subCode)+" "
+    endif
 
-    IF ! Empty( oError:filename )
-        cMessage += "<" + oError:filename + "> "
-    ENDIF
+    if (ValType(oError:description )=="C")
+        cMessage+=oError:description+" "
+    endif
 
-    IF ValType( oError:osCode ) == "N"
-        cMessage += "OS:" + LTrim( Str( oError:osCode ) ) + " "
-    ENDIF
+    if (!Empty(oError:operation))
+        cMessage+="("+oError:operation+") "
+    endif
 
-    IF ValType( oError:tries ) == "N"
-        cMessage += "#:" + LTrim( Str( oError:tries ) ) + " "
-    ENDIF
+    if (!Empty(oError:filename))
+        cMessage+="<"+oError:filename+"> "
+    endif
 
-    IF ValType( oError:Args ) == "A"
-        cMessage += "A:" + LTrim( Str( Len( oError:Args ) ) ) + ":"
-        FOR tmp := 1 TO Len( oError:Args )
-            cMessage += ValType( oError:Args[ tmp ] ) + ":" + XToStrE( oError:Args[ tmp ] )
-            IF tmp < Len( oError:Args )
-                cMessage += ";"
-            ENDIF
-        NEXT
-        cMessage += " "
-    ENDIF
+    if (ValType(oError:osCode )=="N")
+        cMessage+="OS:"+hb_NToC(oError:osCode)+" "
+    endif
 
-    IF oError:canDefault .OR. ;
-       oError:canRetry .OR. ;
-       oError:canSubstitute
+    if (ValType(oError:tries)=="N")
+        cMessage+="#:"+hb_NToC( oError:tries )+" "
+    endif
 
-        cMessage += "F:"
-        IF oError:canDefault
-            cMessage += "D"
-        ENDIF
-        IF oError:canRetry
-            cMessage += "R"
-        ENDIF
-        IF oError:canSubstitute
-            cMessage += "S"
-        ENDIF
-    ENDIF
+    if (ValType(oError:Args)=="A")
+        cMessage+="A:"+hb_NToC(Len( oError:Args ))+":"
+        nArgs:=Len(oError:Args)
+        for tmp:= 1 to nArgs
+            cMessage+=ValType(oError:Args[tmp])+":"+XToStrE(oError:Args[tmp])
+            if (tmp<nArgs)
+                cMessage+=";"
+            endif
+        next tmp
+        cMessage+=" "
+    endif
 
-    RETURN( cMessage ) as character
+    if oError:canDefault .or. oError:canRetry .or. oError:canSubstitute
 
-STATIC FUNCTION XToStrE( xValue as anytype )
+        cMessage+="F:"
+        if oError:canDefault
+            cMessage+="D"
+        endif
+        if oError:canRetry
+            cMessage+="R"
+        endif
+        if oError:canSubstitute
+            cMessage+="S"
+        endif
+    endif
 
-    LOCAL cType as character := ValType( xValue  )
+    return(cMessage) as character
 
-    DO CASE
-        CASE cType == "C"
-            xValue := StrTran( xValue, Chr( 0 ), '" + Chr( 0 ) + "' )
-            xValue := StrTran( xValue, Chr( 9 ), '" + Chr( 9 ) + "' )
-            xValue := StrTran( xValue, Chr( 10 ), '" + Chr( 10 ) + "' )
-            xValue := StrTran( xValue, Chr( 13 ), '" + Chr( 13 ) + "' )
-            xValue := StrTran( xValue, Chr( 26 ), '" + Chr( 26 ) + "' )
-            RETURN xValue
-        CASE cType == "N" ; RETURN LTrim( Str( xValue ) )
-        CASE cType == "D" ; RETURN "0d" + iif( Empty( xValue ), "0", DToS( xValue ) )
-        CASE cType == "L" ; RETURN iif( xValue, ".T.", ".F." )
-        CASE cType == "O" ; RETURN xValue:className() + " Object"
-        CASE cType == "U" ; RETURN "NIL"
-        CASE cType == "B" ; RETURN "{||...}"
-        CASE cType == "A" ; RETURN "{.[" + LTrim( Str( Len( xValue ) ) ) + "].}"
-        CASE cType == "M" ; RETURN "M:" + xValue
-    ENDCASE
+static function XToStrE( xValue as anytype )
 
-    RETURN ""
+    local cType as character:=ValType(xValue )
+
+    local cStrRet as character
+
+    switch cType
+        case "C"
+            xValue:=hb_StrReplace(;
+                xValue,;
+                ,{;
+                     Chr(0) => '"+Chr(0)+"';
+                    ,Chr(9) => '"+Chr(9)+"';
+                    ,Chr(10) => '"+Chr(10)+"';
+                    ,Chr(13) => '"+Chr(13)+"';
+                    ,Chr(26) => '"+Chr(26)+"';
+                };
+            )
+            cStrRet:=xValue
+            exit
+        case "N"
+            cStrRet:=hb_NToS(xValue)
+            exit
+        case "D"
+            cStrRet:="0d"+iif(Empty(xValue),"0",DToS(xValue))
+            exit
+        case "L"
+            cStrRet:=iif(xValue,".T.",".F.")
+            exit
+        case "O"
+            cStrRet:=xValue:className()+" Object"
+            exit
+        case "U"
+            cStrRet:="NIL"
+            exit
+        case "B"
+            cStrRet:="{||...}"
+            exit
+        case "A"
+            cStrRet:="{.["+hb_NToC(Len(xValue))+"].}"
+            exit
+        case "M"
+            cStrRet:="M:"+xValue
+            exit
+        otherwise
+            cStrRet:=""
+    end switch
+
+    return(cStrRet)

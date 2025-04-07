@@ -3,6 +3,11 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-07 20:32 UTC naldodj
+  * src/agents/agent_math.prg
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_ollama.exe
+
 2025-04-07 18:55 UTC naldodj
   * src/tst/hb_agents_lmstudio.exe
   * src/tst/hb_agents_ollama.exe
