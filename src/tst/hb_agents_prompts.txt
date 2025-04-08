@@ -26,9 +26,6 @@ What is the cosine of 0?
 What is the Tangent of 1?
 What is the whole part of 15.25?
 
-What's the weather like?
-What is Dom Pedro II's full name?
-
 What is the floor of 3.7?
 What is the ceiling of 1.1?
 What is the sign of -4.5?
@@ -45,3 +42,9 @@ What is the hyperbolic tangent of 2?
 What is 45 degrees converted to radians?
 What is PI radians converted to degrees?
 What is the value of pi?
+
+What is the mantissa of the number 15.75?
+What is the exponent of the number 15.75?
+
+What's the weather like?
+What is Dom Pedro II's full name?
