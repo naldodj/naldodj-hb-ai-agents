@@ -29,6 +29,8 @@ procedure Main()
     local cURL as character
     local cModel as character
 
+    local oHTTPConnector as object
+
     CLS
 
     #ifdef __ALT_D__    // Compile with -b -D__ALT_D__
@@ -45,10 +47,13 @@ procedure Main()
 
     cURL:="http://127.0.0.1:1234/v1/chat/completions"
 
+    oHTTPConnector:=TIPHTTPConnector():New(cURL)
+    oHTTPConnector:SetTimeout(600)
+
     for each aModel in aModels
         if (aModel[2])
             cModel:=aModel[1]
-            ExecutePrompts(cModel,cURL)
+            ExecutePrompts(cModel,cURL,oHTTPConnector)
         endif
     next each //aModel
 

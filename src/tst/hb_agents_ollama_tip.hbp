@@ -1,0 +1,16 @@
+-w3 -es2
+
+-cpp
+#-compr=max
+
+-i../../include/
+
+#Enable debugging (comment this line to disable it)
+-DDEBUG
+
+@./hb_core_agents.hbp
+@../../naldodj-hb-httpconnector/src/tst/http_connector.hbp
+
+./hb_agents_ollama_tip.prg
+
+-o./${hb_name}

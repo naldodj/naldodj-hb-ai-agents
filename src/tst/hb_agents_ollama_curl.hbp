@@ -11,6 +11,6 @@
 @./hb_core_agents.hbp
 @../../naldodj-hb-httpconnector/src/tst/http_connector.hbp
 
-./hb_agents_ollama.prg
+./hb_agents_ollama_curl.prg
 
 -o./${hb_name}

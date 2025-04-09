@@ -2,7 +2,7 @@
 Released to Public Domain.
 --------------------------------------------------------------------------------------
 */
-static procedure ExecutePrompts(cModel,cURL)
+static procedure ExecutePrompts(cModel as character,cURL as character,oHTTPConnector as object)
 
     local aPrompts as array:=Array(0)
 
@@ -15,8 +15,6 @@ static procedure ExecutePrompts(cModel,cURL)
 
     local hAgent as hash
     local hAgents as hash
-
-    local oHTTPConnector as object
 
     local nPrompt
 
@@ -44,9 +42,6 @@ static procedure ExecutePrompts(cModel,cURL)
     hAgents:=hb_agents():Execute("GetAgents")
 
     ? cSeparator
-
-    oHTTPConnector:=TCURLHTTPConnector():New("http://127.0.0.1:1234/v1/chat/completions")
-    oHTTPConnector:SetTimeout(600)
 
     WITH OBJECT TLLM():New(cModel,cURL,oHTTPConnector)
 
