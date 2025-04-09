@@ -28,12 +28,12 @@ CLASS TLLM
     DATA hAgents INIT {=>} as hash
     DATA hResponse INIT {=>} as hash
 
-    DATA phCurl as pointer
-
     DATA nError INIT 0 as numeric
     DATA nHttpCode INIT 0 as numeric
 
-    METHOD New(cModel as character,cURL as character) as object
+    DATA oHTTPConnector as object
+
+    METHOD New(cModel as character,cURL as character,oHTTPConnector as object) as object
     METHOD AddAgent(oTAgent as object) as object
     METHOD End()
 
@@ -45,12 +45,17 @@ CLASS TLLM
 
 ENDCLASS
 
-METHOD New(cModel as character,cURL as character) CLASS TLLM
+METHOD New(cModel as character,cURL as character,oHTTPConnector as object) CLASS TLLM
     self:cModel:=cModel
     self:cUrl:=cURL
+    if (valType(oHTTPConnector)!="O")
+        self:oHTTPConnector:=TCURLHTTPConnector():New(self:cUrl)
+        self:cUrl:=self:oHTTPConnector:oURL:cAddress
+    else
+        self:oHTTPConnector:=oHTTPConnector
+    endif
     self:cCategory:="general"
     curl_global_init()
-    self:phCurl:=curl_easy_init()
     self:hAgents:={=>}
     self:hResponse:={=>}
     return(self) as object
@@ -65,8 +70,7 @@ METHOD AddAgent(oTAgent as object) CLASS TLLM
     return(self) as object
 
 METHOD PROCEDURE End() CLASS TLLM
-    curl_easy_cleanup(self:phCurl)
-    curl_global_cleanup()
+    self:oHTTPConnector:Close()
     return
 
 METHOD GetResponseValue() CLASS TLLM
@@ -102,9 +106,10 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLLM
     local hTools as hash:={=>}
     local hRequest as hash:={=>}
     local hMessage as hash:={=>}
+    local hResponse as hash
     local hToolInfo as hash
 
-    local nError as numeric
+    local lTCURLHTTPConnector as logical:=(self:oHTTPConnector:ClassName()=="TCURLHTTPCONNECTOR")
 
     if (!Empty(oTAgent:hTools))
         for each cKey in hb_HKeys(oTAgent:hTools)
@@ -112,13 +117,12 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLLM
         next each
     endif
 
-    curl_easy_reset(self:phCurl)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_POST,.T.)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_URL,self:cUrl)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_HTTPHEADER,{"Content-Type: application/json"})
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_USERNAME,'')
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_DL_BUFF_SETUP)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
+    self:oHTTPConnector:SetHeader("Content-Type","application/json")
+    if (lTCURLHTTPConnector)
+        self:oHTTPConnector:SetOption(HB_CURLOPT_USERNAME,'')
+        self:oHTTPConnector:SetOption(HB_CURLOPT_DL_BUFF_SETUP)
+        self:oHTTPConnector:SetOption(HB_CURLOPT_SSL_VERIFYPEER,.F.)
+    endif
 
     hRequest["model"]:=self:cModel
     hMessage["role"]:="user"
@@ -140,11 +144,11 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLLM
     hRequest["temperature"]:=0.5
 
     cJSON:=hb_jsonEncode(hRequest)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_POSTFIELDS,cJSON)
 
-    nError:=curl_easy_perform(self:phCurl)
-    if (nError==HB_CURLE_OK)
-        self:cResponse:=curl_easy_dl_buff_get(self:phCurl)
+    hResponse:=self:oHTTPConnector:SendRequest("POST",cJSON)
+
+    if (hb_HHasKey(hResponse,"has_error").and.(!hResponse["has_error"]))
+        self:cResponse:=hResponse["body"]
         cResponse:=self:GetResponseValue()
         //TODO: rever estre block BEGIN SEQUENCE WITH __BreakBlock()
         BEGIN SEQUENCE WITH __BreakBlock()
@@ -172,7 +176,7 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLLM
     if (Empty(hToolInfo))
         #ifdef DEBUG
             DispOut("DEBUG: ","r+/n")
-            ? "Error in GetToolName:"+hb_NToC(nError),hb_eol()
+            ? "Error in GetToolName",hb_eol()
         #endif
     endif
 
@@ -188,8 +192,9 @@ METHOD GetPromptCategory(cPrompt as character) CLASS TLLM
 
     local hMessage as hash:={=>}
     local hRequest as hash:={=>}
+    local hResponse as hash
 
-    local nError as numeric
+    local lTCURLHTTPConnector as logical:=(self:oHTTPConnector:ClassName()=="TCURLHTTPCONNECTOR")
 
     if (!Empty(self:hAgents))
         hb_HEval(self:hAgents,{|k as character|aAdd(aCategories,{"category_name"=>k,"category_purpose"=>self:hAgents[k]:cAgentPurpose})})
@@ -208,13 +213,12 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
 *        ? cCategories,hb_eol()
     #endif
 
-    curl_easy_reset(self:phCurl)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_POST,.T.)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_URL,self:cUrl)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_HTTPHEADER,{"Content-Type: application/json"})
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_USERNAME,'')
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_DL_BUFF_SETUP)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
+    self:oHTTPConnector:SetHeader("Content-Type","application/json")
+    if (lTCURLHTTPConnector)
+        self:oHTTPConnector:SetOption(HB_CURLOPT_USERNAME,'')
+        self:oHTTPConnector:SetOption(HB_CURLOPT_DL_BUFF_SETUP)
+        self:oHTTPConnector:SetOption(HB_CURLOPT_SSL_VERIFYPEER,.F.)
+    endif
 
     hRequest["model"]:=self:cModel
     hMessage["role"]:="user"
@@ -225,11 +229,10 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
     hRequest["max_tokens"]:=-1
 
     cJSON:=hb_jsonEncode(hRequest)
-    curl_easy_setopt(self:phCurl,HB_CURLOPT_POSTFIELDS,cJSON)
+    hResponse:=self:oHTTPConnector:SendRequest("POST",cJSON)
 
-    nError:=curl_easy_perform(self:phCurl)
-    if (nError==HB_CURLE_OK)
-        self:cResponse:=curl_easy_dl_buff_get(self:phCurl)
+    if (hb_HHasKey(hResponse,"has_error").and.(!hResponse["has_error"]))
+        self:cResponse:=hResponse["body"]
         //TODO: rever estre block BEGIN SEQUENCE WITH __BreakBlock()
         BEGIN SEQUENCE WITH __BreakBlock()
             self:cCategory:=self:GetResponseValue()
@@ -247,7 +250,7 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
     if (Empty(self:cResponse))
         #ifdef DEBUG
             DispOut("DEBUG: ","r+/n")
-            ? "Error in GetPromptCategory: "+hb_NToC(nError),hb_eol()
+            ? "Error in GetPromptCategory",hb_eol()
         #endif
     endif
 
@@ -259,8 +262,6 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
 
 METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as codeblock) CLASS TLLM
 
-    local aHeaders as array
-
     local cJSON as character
     local cToolName as character
     local cCategory as character
@@ -270,8 +271,10 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
     local hRequest as hash:={=>}
     local hMessage as hash:={=>}
     local hToolInfo as hash
+    local hResponse as hash
 
     local lContinue as logical:=.T.
+    local lTCURLHTTPConnector as logical:=(self:oHTTPConnector:ClassName()=="TCURLHTTPCONNECTOR")
 
     local nTool as numeric
     local nCategory as numeric
@@ -410,13 +413,11 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
             ? hb_eol()
         #endif
 
-        curl_easy_reset(self:phCurl)
-        curl_easy_setopt(self:phCurl,HB_CURLOPT_POST,.T.)
-        curl_easy_setopt(self:phCurl,HB_CURLOPT_URL,self:cUrl)
-        aHeaders:={"Content-Type: application/json"}
-        curl_easy_setopt(self:phCurl,HB_CURLOPT_HTTPHEADER,aHeaders)
-        curl_easy_setopt(self:phCurl,HB_CURLOPT_USERNAME,'')
-        curl_easy_setopt(self:phCurl,HB_CURLOPT_SSL_VERIFYPEER,.F.)
+        self:oHTTPConnector:SetHeader("Content-Type","application/json")
+        if (lTCURLHTTPConnector)
+            self:oHTTPConnector:SetOption(HB_CURLOPT_USERNAME,'')
+            self:oHTTPConnector:SetOption(HB_CURLOPT_SSL_VERIFYPEER,.F.)
+        endif
 
         hRequest["model"]:=self:cModel
         hMessage["role"]:="user"
@@ -440,21 +441,25 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
 
         if (bWriteFunction!=nil)
             hRequest["stream"]:=.T.
-            curl_easy_setopt(self:phCurl,HB_CURLOPT_WRITEFUNCTION,bWriteFunction)
+            if (lTCURLHTTPConnector)
+                self:oHTTPConnector:SetOption(HB_CURLOPT_WRITEFUNCTION,bWriteFunction)
+            endif
         else
             hRequest["stream"]:=.F.
-            curl_easy_setopt(self:phCurl,HB_CURLOPT_DL_BUFF_SETUP)
+            if (lTCURLHTTPConnector)
+                self:oHTTPConnector:SetOption(HB_CURLOPT_DL_BUFF_SETUP)
+            endif
         endif
 
         cJSON:=hb_jsonEncode(hRequest)
-        curl_easy_setopt(self:phCurl,HB_CURLOPT_POSTFIELDS,cJSON)
+        hResponse:=self:oHTTPConnector:SendRequest("POST",cJSON)
 
-        self:nError:=curl_easy_perform(self:phCurl)
-        curl_easy_getinfo(self:phCurl,HB_CURLINFO_RESPONSE_CODE,@self:nHttpCode)
+        self:nError:=hResponse["error_number"]
+        self:nHttpCode:=hResponse["http_status"]
 
-        if (self:nError==HB_CURLE_OK)
+        if (hb_HHasKey(hResponse,"has_error").and.(!hResponse["has_error"]))
             if (bWriteFunction==nil)
-                self:cResponse:=curl_easy_dl_buff_get(self:phCurl)
+                self:cResponse:=hResponse["body"]
             endif
         else
             self:cResponse:=hb_jsonEncode({"error"=>{"message"=>"Error in Send: "+hb_NToC(self:nError)},"done"=>.T.})

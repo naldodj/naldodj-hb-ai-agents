@@ -3,6 +3,17 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-09 19:29 UTC naldodj (naldodj-hb-httpconnector)
+  + .gitmodules
+  + src/naldodj-hb-httpconnector
+  * src/tst/hb_agents_lmstudio.exe
+  * src/tst/hb_agents_lmstudio.hbp
+  * src/tst/hb_agents_ollama.exe
+  * src/tst/hb_agents_ollama.hbp
+  * src/tst/hb_core_agents.hbp
+  * src/core/tllm.prg
+  * src/tst/hb_agents_prompts.prg
+
 2025-04-07 22:28 UTC naldodj
   * src/tst/hb_agents_prompts.txt
 

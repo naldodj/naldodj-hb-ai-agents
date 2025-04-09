@@ -1,0 +1,3 @@
+[submodule "src/naldodj-hb-httpconnector"]
+    path = src/naldodj-hb-httpconnector
+    url = https://github.com/naldodj/naldodj-hb-httpconnector.git

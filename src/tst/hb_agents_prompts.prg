@@ -16,6 +16,8 @@ static procedure ExecutePrompts(cModel,cURL)
     local hAgent as hash
     local hAgents as hash
 
+    local oHTTPConnector as object
+
     local nPrompt
 
     aAdd(aPrompts,"Today is "+cToday+". How many days have passed since the proclamation of the Republic in Brazil on 15/11/1889 until today")
@@ -43,7 +45,10 @@ static procedure ExecutePrompts(cModel,cURL)
 
     ? cSeparator
 
-    WITH OBJECT TOLLama():New(cModel,cURL)
+    oHTTPConnector:=TCURLHTTPConnector():New("http://127.0.0.1:1234/v1/chat/completions")
+    oHTTPConnector:SetTimeout(600)
+
+    WITH OBJECT TLLM():New(cModel,cURL,oHTTPConnector)
 
         DispOut("DEBUG: Model: ","RB+/n")
         ?  :cModel ,cEoL

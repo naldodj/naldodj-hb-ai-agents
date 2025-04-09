@@ -17,3 +17,5 @@
 ../agents/agent_datediff.prg
 ../agents/agent_datetime.prg
 ../agents/hb_agents_list.prg
+
+../naldodj-hb-httpconnector/src/core/http_connector.prg
