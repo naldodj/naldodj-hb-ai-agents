@@ -3,6 +3,9 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-10 08:52 UTC naldodj (update submodule: naldodj-hb-httpconnector)
+  * src/naldodj-hb-httpconnector
+
 2025-04-09 19:55 UTC naldodj (naldodj-hb-httpconnector)
   + src/tst/hb_agents_lmstudio_curl.exe
   + src/tst/hb_agents_lmstudio_curl.hbp
