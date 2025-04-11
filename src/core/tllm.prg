@@ -36,6 +36,8 @@ CLASS TLLM
     METHOD New(cModel as character,cURL as character,oHTTPConnector as object) as object
     METHOD AddAgent(oTAgent as object) as object
     METHOD End()
+    METHOD Reset()
+    METHOD ResetAll()
 
     METHOD GetResponseValue() as character
     METHOD GetToolName(cPrompt as character,oTAgent as object) as character
@@ -71,6 +73,14 @@ METHOD AddAgent(oTAgent as object) CLASS TLLM
 
 METHOD PROCEDURE End() CLASS TLLM
     self:oHTTPConnector:Close()
+    return
+
+METHOD PROCEDURE Reset() CLASS TLLM
+    self:oHTTPConnector:Reset()
+    return
+
+METHOD PROCEDURE ResetAll() CLASS TLLM
+    self:oHTTPConnector:ResetAll()
     return
 
 METHOD GetResponseValue() CLASS TLLM

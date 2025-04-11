@@ -3,6 +3,23 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-11 03:43 UTC naldodj
+  + src/tst/compile.sh
+  * src/core/tllm.prg
+  * src/naldodj-hb-httpconnector
+  * src/tst/hb_agents_lmstudio_curl.exe
+  * src/tst/hb_agents_lmstudio_curl.hbp
+  * src/tst/hb_agents_lmstudio_curl.prg
+  * src/tst/hb_agents_lmstudio_tip.exe
+  * src/tst/hb_agents_lmstudio_tip.hbp
+  * src/tst/hb_agents_lmstudio_tip.prg
+  * src/tst/hb_agents_ollama_curl.exe
+  * src/tst/hb_agents_ollama_curl.hbp
+  * src/tst/hb_agents_ollama_curl.prg
+  * src/tst/hb_agents_ollama_tip.exe
+  * src/tst/hb_agents_ollama_tip.hbp
+  * src/tst/hb_agents_ollama_tip.prg
+
 2025-04-10 08:52 UTC naldodj (update submodule: naldodj-hb-httpconnector)
   * src/naldodj-hb-httpconnector
 
