@@ -40,8 +40,9 @@ CLASS TLLM
     METHOD ResetAll()
 
     METHOD GetResponseValue() as character
-    METHOD GetToolName(cPrompt as character,oTAgent as object) as character
+    METHOD GetToolName(cPrompt as character,oTAgent as object) as hash
     METHOD GetPromptCategory(cPrompt as character) as character
+    METHOD GetFormatedAnswer(cPrompt as character,cAnswer as character) as character
 
     METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as codeblock) as character
 
@@ -270,9 +271,49 @@ If a prompt was mistakenly classified as "general," refining the wording to incl
 
     return(self:cCategory) as character
 
+METHOD GetFormatedAnswer(cPrompt as character,cAnswer as character) CLASS TLLM
+
+    local cJSON as character
+    local cResponse as character
+
+    local hRequest as hash:={=>}
+    local hMessage as hash:={=>}
+    local hResponse as hash
+
+    local lTCURLHTTPConnector as logical:=(self:oHTTPConnector:ClassName()=="TCURLHTTPCONNECTOR")
+
+    self:oHTTPConnector:SetHeader("Content-Type","application/json")
+    if (lTCURLHTTPConnector)
+        self:oHTTPConnector:SetOption(HB_CURLOPT_USERNAME,'')
+        self:oHTTPConnector:SetOption(HB_CURLOPT_DL_BUFF_SETUP)
+        self:oHTTPConnector:SetOption(HB_CURLOPT_SSL_VERIFYPEER,.F.)
+    endif
+
+    hRequest["model"]:=self:cModel
+    hMessage["role"]:="user"
+
+    hMessage["content"]:="Considering the prompt: "+cPrompt+" and the answer "+cAnswer+", reformat the response to ensure it integrates naturally into the question's context. The response should be clear, concise, and avoid unnecessary repetition. Ensure the wording follows a natural language structure (e.g., 'The factorial of 5 is 120' instead of repeating the question). Translate the response, if necessary, to match the prompt's language. Return only the properly formatted response."
+    hRequest["messages"]:={hMessage}
+    hRequest["stream"]:=.F.
+    hRequest["temperature"]:=0.5
+
+    cJSON:=hb_jsonEncode(hRequest)
+
+    hResponse:=self:oHTTPConnector:SendRequest("POST",cJSON)
+
+    if (hb_HHasKey(hResponse,"has_error").and.(!hResponse["has_error"]))
+        self:cResponse:=hResponse["body"]
+        cResponse:=allTrim(hb_StrReplace(self:GetResponseValue(),{Chr(13)=>"",Chr(10)=>""}))
+    else
+        cResponse:=cAnswer
+    endif
+
+    return(cResponse)
+
 METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as codeblock) CLASS TLLM
 
     local cJSON as character
+    local cAnswer as character
     local cToolName as character
     local cCategory as character
     local cToolResult as character
@@ -408,7 +449,15 @@ METHOD Send(cPrompt as character,cImageFileName as character,bWriteFunction as c
                 DispOut("DEBUG: Tool result: ","GR+/n")
                 ? cToolResult,hb_eol()
             #endif
-            self:cResponse:=hb_jsonEncode({"message"=>{"content"=>cToolResult},"done"=>.T.})
+
+            cAnswer:=self:GetFormatedAnswer(cPrompt,cToolResult)
+            #ifdef DEBUG
+                DispOut("DEBUG: Received cAnswer: ","g+/n")
+                ? cAnswer,hb_eol()
+            #endif
+
+            self:cResponse:=hb_jsonEncode({"message"=>{"content"=>cAnswer},"done"=>.T.})
+
             lContinue:=.F.
             break
 
