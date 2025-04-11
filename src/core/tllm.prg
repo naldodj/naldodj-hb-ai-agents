@@ -292,7 +292,22 @@ METHOD GetFormatedAnswer(cPrompt as character,cAnswer as character) CLASS TLLM
     hRequest["model"]:=self:cModel
     hMessage["role"]:="user"
 
-    hMessage["content"]:="Considering the prompt: "+cPrompt+" and the answer "+cAnswer+", reformat the response to ensure it integrates naturally into the question's context. The response should be clear, concise, and avoid unnecessary repetition. Ensure the wording follows a natural language structure (e.g., 'The factorial of 5 is 120' instead of repeating the question). Translate the response, if necessary, to match the prompt's language. Return only the properly formatted response."
+    #pragma __cstream|hMessage["content"]:=%s
+        Given the prompt: __PROMPT__ and the __ANSWER__ response, reformat the answer to ensure that it integrates naturally into the context of the question.
+        The answer should be clear, concise, and avoid unnecessary repetition.
+        Make sure the text follows a natural language structure (e.g., 'The factorial of 5 is 120' instead of repeating the question).
+        Translate the answer, if necessary, to match the language of the prompt.
+        Do not include the content of the prompt in the answer.
+        Return only the correctly formatted answer.
+    #pragma __endtext
+    hMessage["content"]:=hb_StrReplace(;
+        hMessage["content"];
+        ,{;
+            "__PROMPT__"=>cPrompt;
+            ,"__ANSWER__"=>cAnswer;
+        };
+    )
+
     hRequest["messages"]:={hMessage}
     hRequest["stream"]:=.F.
     hRequest["temperature"]:=0.5
