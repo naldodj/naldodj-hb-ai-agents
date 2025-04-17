@@ -1,0 +1,32 @@
+-w3 -es2
+
+-cpp
+#-compr=max
+
+-i../../include/
+
+#Enable debugging (comment this line to disable it)
+-DDEBUG
+
+@./hb_core_agents.hbp
+
+./hb_agents_lmstudio_winhttp.prg
+
+-lgdiplus
+-lole32
+-lOleDlg
+-lversion
+-lucrt
+-luxtheme
+
+xhb.hbc
+hbct.hbc
+hbwin.hbc
+hbmzip.hbc
+hbziparc.hbc
+hbfoxpro.hbc
+
+-ldflag=/NODEFAULTLIB:msvcrt
+-ldflag+=/NODEFAULTLIB:libucrt
+
+-o./${hb_name}

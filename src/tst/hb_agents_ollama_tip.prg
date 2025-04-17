@@ -51,7 +51,7 @@ procedure Main()
         if (aModel[2])
             cModel:=aModel[1]
             oHTTPConnector:=TCURLHTTPConnector():New(cURL)
-            oHTTPConnector:SetTimeout(nTimeOut)
+            oHTTPConnector:SetTimeOuts(nTimeOut,nTimeOut,nTimeOut,nTimeOut)
             ExecutePrompts(cModel,cURL,oHTTPConnector)
         endif
     next each //aModel

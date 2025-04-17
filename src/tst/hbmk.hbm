@@ -1,6 +1,6 @@
 hbct.hbc
 hbtip.hbc
-hbssl.hbc
+# hbssl.hbc
 hbcurl.hbc
 hbhttpd.hbc
 
@@ -8,4 +8,4 @@ hbhttpd.hbc
 #How can I make the system recognize them without this?
 hbtest.hbc
 
--w3 -es2 -lm
+-w3 -es2

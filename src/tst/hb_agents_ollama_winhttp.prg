@@ -50,7 +50,7 @@ procedure Main()
     for each aModel in aModels
         if (aModel[2])
             cModel:=aModel[1]
-            oHTTPConnector:=TCURLHTTPConnector():New(cURL)
+            oHTTPConnector:=TWinHTTPConnector():New(cURL)
             oHTTPConnector:SetTimeOuts(nTimeOut,nTimeOut,nTimeOut,nTimeOut)
             ExecutePrompts(cModel,cURL,oHTTPConnector)
         endif

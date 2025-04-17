@@ -3,6 +3,35 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-17 19:22 UTC naldodj (msvc)
+  + src/tst/go64.bat
+  + src/tst/hb_agents_lmstudio_curl_msvc.exe
+  + src/tst/hb_agents_lmstudio_curl_msvc.hbp
+  + src/tst/hb_agents_lmstudio_msxml2_msvc.exe
+  + src/tst/hb_agents_lmstudio_msxml2_msvc.hbp
+  + src/tst/hb_agents_lmstudio_msxml2.prg
+  + src/tst/hb_agents_lmstudio_tip_msvc.exe
+  + src/tst/hb_agents_lmstudio_tip_msvc.hbp
+  + src/tst/hb_agents_lmstudio_winhttp_msvc.exe
+  + src/tst/hb_agents_lmstudio_winhttp_msvc.hbp
+  + src/tst/hb_agents_lmstudio_winhttp.prg
+  + src/tst/hb_agents_ollama_curl_msvc.exe
+  + src/tst/hb_agents_ollama_curl_msvc.hbp
+  + src/tst/hb_agents_ollama_msxml2_msvc.exe
+  + src/tst/hb_agents_ollama_msxml2_msvc.hbp
+  + src/tst/hb_agents_ollama_msxml2.prg
+  + src/tst/hb_agents_ollama_tip_msvc.exe
+  + src/tst/hb_agents_ollama_tip_msvc.hbp
+  + src/tst/hb_agents_ollama_winhttp_msvc.exe
+  + src/tst/hb_agents_ollama_winhttp_msvc.hbp
+  + src/tst/hb_agents_ollama_winhttp.prg
+  * src/tst/hb_agents_lmstudio_curl.prg
+  * src/tst/hb_agents_lmstudio_tip.prg
+  * src/tst/hb_agents_ollama_curl.prg
+  * src/tst/hb_agents_ollama_tip.prg
+  * src/tst/hb_core_agents.hbp
+  * src/tst/hbmk.hbm
+
 2025-04-17 16:00 UTC naldodj (update submodule: naldodj-hb-httpconnector)
   * src/naldodj-hb-httpconnector
 

@@ -3,7 +3,7 @@
 | |__  | |__       __ _   __ _   ___  _ __  | |_  ___    | |_  ___ | |_
 | '_ \ | '_ \     / _` | / _` | / _ \| '_ \ | __|/ __|   | __|/ __|| __|
 | | | || |_) |   | (_| || (_| ||  __/| | | || |_ \__ \   | |_ \__ \| |_
-|_| |_||_.__/     \__,_| \__, | \___||_| |_| \__||___/    \__||___/ \__|
+|_| |_||_.__/     \__,_| \__,| \___||_| |_| \__||___/    \__||___/ \__|
                          |___/
 
 Ref.: FiveTech Software tech support forums
@@ -13,6 +13,8 @@ Released to Public Domain.
 --------------------------------------------------------------------------------------
 
 */
+
+#require "hbct"
 
 REQUEST HB_CODEPAGE_UTF8EX
 
@@ -42,15 +44,15 @@ procedure Main()
 
     aModels:=Array(0)
     /*The Best First:*/
-    aAdd(aModels,{"hf.co/lmstudio-community/Qwen2.5-7B-Instruct-1M-GGUF:Q8_0",.T.})
-    aAdd(aModels,{"gemma3",.T.})
+    aAdd(aModels,{"qwen2.5-7b-instruct-1m",.T.})
+    aAdd(aModels,{"gemma-3-4b-it",.T.})
 
-    cURL:="http://localhost:11434/api/chat"
+    cURL:="http://127.0.0.1:1234/v1/chat/completions"
 
     for each aModel in aModels
         if (aModel[2])
             cModel:=aModel[1]
-            oHTTPConnector:=TCURLHTTPConnector():New(cURL)
+            oHTTPConnector:=TWinHTTPConnector():New(cURL)
             oHTTPConnector:SetTimeOuts(nTimeOut,nTimeOut,nTimeOut,nTimeOut)
             ExecutePrompts(cModel,cURL,oHTTPConnector)
         endif
