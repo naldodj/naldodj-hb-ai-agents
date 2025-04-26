@@ -355,7 +355,7 @@ The "agent_math" provides tools for performing basic mathematical operations by 
     oTAgent:aAddTool("TIMES",{|hParams|Agent_Math():Execute("TIMES",hParams)},hTool)
 
     hTool:={=>}
-    hTool["name"] := "DIVIDEDBY"
+    hTool["name"] := "DIVIDEBY"
     hTool["description"] := "Divides one number by another."
     hTool["inputSchema"] := {=>}
     hTool["inputSchema"]["type"] := "object"
@@ -366,7 +366,7 @@ The "agent_math" provides tools for performing basic mathematical operations by 
     hTool["inputSchema"]["required"]:={"expression"}
     hTool["inputSchema"]["additionalProperties"] := .F.
     hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
-    oTAgent:aAddTool("DIVIDEDBY",{|hParams|Agent_Math():Execute("DIVIDEDBY",hParams)},hTool)
+    oTAgent:aAddTool("DIVIDEBY",{|hParams|Agent_Math():Execute("DIVIDEBY",hParams)},hTool)
 
     hTool:={=>}
     hTool["name"] := "POWEROF"
@@ -380,7 +380,7 @@ The "agent_math" provides tools for performing basic mathematical operations by 
     hTool["inputSchema"]["required"]:={"expression"}
     hTool["inputSchema"]["additionalProperties"] := .F.
     hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
-    oTAgent:aAddTool("DIVIDEDBY",{|hParams|Agent_Math():Execute("DIVIDEDBY",hParams)},hTool)
+    oTAgent:aAddTool("POWEROF",{|hParams|Agent_Math():Execute("POWEROF",hParams)},hTool)
 
     hTool:={=>}
     hTool["name"] := "FLOOR"

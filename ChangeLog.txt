@@ -3,6 +3,22 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-26 15:10 UTC naldodj (hbmcp)
+  - src/mcp/stdio/hbmcp.log
+  * src/agents/agent_math.prg
+  * src/tst/hb_agents_lmstudio_curl_msvc.exe
+  * src/tst/hb_agents_lmstudio_curl.exe
+  * src/tst/hb_agents_lmstudio_msxml2_msvc.exe
+  * src/tst/hb_agents_lmstudio_tip_msvc.exe
+  * src/tst/hb_agents_lmstudio_tip.exe
+  * src/tst/hb_agents_lmstudio_winhttp_msvc.exe
+  * src/tst/hb_agents_ollama_curl_msvc.exe
+  * src/tst/hb_agents_ollama_curl.exe
+  * src/tst/hb_agents_ollama_msxml2_msvc.exe
+  * src/tst/hb_agents_ollama_tip_msvc.exe
+  * src/tst/hb_agents_ollama_tip.exe
+  * src/tst/hb_agents_ollama_winhttp_msvc.exe
+
 2025-04-26 14:26 UTC naldodj (hbmcp)
   + src/mcp/stdio/go64.bat
   + src/mcp/stdio/hbmcp.env
