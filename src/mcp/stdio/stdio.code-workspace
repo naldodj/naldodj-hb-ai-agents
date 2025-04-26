@@ -1,0 +1,37 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../.."
+		}
+	],
+    "settings": {
+        "powershell.cwd": "stdio",
+        "hbmcp": {
+            "type": "stdio",
+            "command": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp.exe",
+            "args": [
+            ],
+            "env": {
+                "MCP_LOGFILE": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp.log"
+            }
+        },
+        "totvsLanguageServer.editor.linter.includes": "C:\\totvs\\includes;C:\\GitHub\\naldodj-tlpp\\include;C:\\GitHub\\arenadunas\\includes;C:\totvs\\uf\\agrosul\\agrosuladvpl\\includes;C:\\GitHub\\naldodj-xbase-leetcode-solutions\\include"
+    },
+    "mcp": {
+        "inputs": [],
+        "servers": {
+            "hbmcp": {
+                "type": "stdio",
+                "command": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp.exe",
+                "args": [
+                ],
+                "env": {
+                    "MCP_LOGFILE": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp.log"
+                }
+            }
+        }
+    }
+}

@@ -124,7 +124,7 @@ METHOD GetToolName(cPrompt as character,oTAgent as object) CLASS TLLM
 
     if (!Empty(oTAgent:hTools))
         for each cKey in hb_HKeys(oTAgent:hTools)
-            hTools[cKey]:={"parameters"=>oTAgent:hTools[cKey]["parameters"]}
+            hTools[cKey]:={"tool"=>oTAgent:hTools[cKey]["tool"]}
         next each
     endif
 

@@ -1,9 +1,9 @@
 /*
                             _           _         _              _  _   __   __
-  __ _   __ _   ___  _ __  | |_      __| |  __ _ | |_   ___   __| |(_) / _| / _|
- / _` | / _` | / _ \| '_ \ | __|    / _` | / _` || __| / _ \ / _` || || |_ | |_
-| (_| || (_| ||  __/| | | || |_    | (_| || (_| || |_ |  __/| (_| || ||  _||  _|
- \__,_| \__,| \___||_| |_| \__|    \__,_| \__,_| \__| \___| \__,_||_||_|  |_|
+  __ _   __ _   ___  _ __  | |_      __| |  __ _ | |_   ___   __| |(_) / _| / _|
+ / _` | / _` | / _ \| '_ \ | __|    / _` | / _` || __| / _ \ / _` || || |_ | |_
+| (_| || (_| ||  __/| | | || |_    | (_| || (_| || |_ |  __/| (_| || ||  _||  _|
+ \__,_| \__,| \___||_| |_| \__|    \__,_| \__,_| \__| \___| \__,_||_||_|  |_|
         |___/
 
 Ref.: FiveTech Software tech support forums
@@ -33,7 +33,7 @@ static function GetAgents()
     local cAgentPrompt as character
     local cAgentPurpose as character
 
-    local hParameters as hash
+    local hTool as hash
 
     #pragma __cstream|cAgentPrompt:=%s
 **Prompt:**
@@ -118,19 +118,175 @@ The "agent_datediff" provides tools for performing various date calculations,inc
 
     oTAgent:=TAgent():New("Agent_DateDiff",cAgentPrompt,cAgentPurpose)
 
-    hParameters:={"params"=>{"date1","date2"}}
-    oTAgent:aAddTool("date_diff_day",{|hParams|Agent_DateDiff():Execute("DateDiffDay",hParams)},hParameters)
-    oTAgent:aAddTool("date_diff_month",{|hParams|Agent_DateDiff():Execute("DateDiffMonth",hParams)},hParameters)
-    oTAgent:aAddTool("date_diff_year",{|hParams|Agent_DateDiff():Execute("DateDiffYear",hParams)},hParameters)
-    oTAgent:aAddTool("date_diff_year_month_day",{|hParams|Agent_DateDiff():Execute("DateDiffYearMonthDay",hParams)},hParameters)
+    hTool:={=>}
+    hTool["name"] := "date_diff_day"
+    hTool["description"] := "Calculate the **number of days** between two dates."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date1"]["description"] := "The first date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["date2"] := {=>}
+    hTool["inputSchema"]["properties"]["date2"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date2"]["description"] := "The second date in ISO 8601 format"
+    hTool["inputSchema"]["required"]:={"date1","date2"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_diff_day",{|hParams|Agent_DateDiff():Execute("DateDiffDay",hParams)},hTool)
 
-    hParameters:={"params"=>{"date","value"}}
-    oTAgent:aAddTool("date_add_day",{|hParams|Agent_DateDiff():Execute("DateAddDay",hParams)},hParameters)
-    oTAgent:aAddTool("date_add_month",{|hParams|Agent_DateDiff():Execute("DateAddMonth",hParams)},hParameters)
-    oTAgent:aAddTool("date_add_year",{|hParams|Agent_DateDiff():Execute("DateAddYear",hParams)},hParameters)
-    oTAgent:aAddTool("date_subtract_day",{|hParams|Agent_DateDiff():Execute("DateSubDay",hParams)},hParameters)
-    oTAgent:aAddTool("date_subtract_month",{|hParams|Agent_DateDiff():Execute("DateSubMonth",hParams)},hParameters)
-    oTAgent:aAddTool("date_subtract_year",{|hParams|Agent_DateDiff():Execute("DateSubYear",hParams)},hParameters)
+    hTool:={=>}
+    hTool["name"] := "date_diff_month"
+    hTool["description"] := "Calculate the **number of full months** between two dates."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date1"]["description"] := "The first date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["date2"] := {=>}
+    hTool["inputSchema"]["properties"]["date2"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date2"]["description"] := "The second date in ISO 8601 format"
+    hTool["inputSchema"]["required"]:={"date1","date2"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_diff_month",{|hParams|Agent_DateDiff():Execute("DateDiffMonth",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_diff_year"
+    hTool["description"] := "Calculate the **number of full years** between two dates."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date1"]["description"] := "The first date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["date2"] := {=>}
+    hTool["inputSchema"]["properties"]["date2"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date2"]["description"] := "The second date in ISO 8601 format"
+    hTool["inputSchema"]["required"]:={"date1","date2"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_diff_year",{|hParams|Agent_DateDiff():Execute("DateDiffYear",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_diff_year_month_day"
+    hTool["description"] := "Calculate the **full difference in years, months, and days** between two dates."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"] := {=>}
+    hTool["inputSchema"]["properties"]["date1"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date1"]["description"] := "The first date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["date2"] := {=>}
+    hTool["inputSchema"]["properties"]["date2"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date2"]["description"] := "The second date in ISO 8601 format"
+    hTool["inputSchema"]["required"]:={"date1","date2"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_diff_year_month_day",{|hParams|Agent_DateDiff():Execute("DateDiffYearMonthDay",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_add_day"
+    hTool["description"] := "Add a **specific number of days** to a given date."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date"] := {=>}
+    hTool["inputSchema"]["properties"]["date"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date"]["description"] := "The base date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["value"] := {=>}
+    hTool["inputSchema"]["properties"]["value"]["type"] := "integer"
+    hTool["inputSchema"]["properties"]["value"]["description"] := "The number of days to add"
+    hTool["inputSchema"]["required"]:={"date","value"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_add_day",{|hParams|Agent_DateDiff():Execute("DateAddDay",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_add_month"
+    hTool["description"] := "Add a **specific number of months** to a given date."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date"] := {=>}
+    hTool["inputSchema"]["properties"]["date"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date"]["description"] := "The base date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["value"] := {=>}
+    hTool["inputSchema"]["properties"]["value"]["type"] := "integer"
+    hTool["inputSchema"]["properties"]["value"]["description"] := "The number of months to add"
+    hTool["inputSchema"]["required"]:={"date","value"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_add_month",{|hParams|Agent_DateDiff():Execute("DateAddMonth",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_add_year"
+    hTool["description"] := "Add a **specific number of years** to a given date."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date"] := {=>}
+    hTool["inputSchema"]["properties"]["date"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date"]["description"] := "The base date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["value"] := {=>}
+    hTool["inputSchema"]["properties"]["value"]["type"] := "integer"
+    hTool["inputSchema"]["properties"]["value"]["description"] := "The number of years to add"
+    hTool["inputSchema"]["required"]:={"date","value"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_add_year",{|hParams|Agent_DateDiff():Execute("DateAddYear",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_subtract_day"
+    hTool["description"] := "Subtract a **specific number of days** from a given date."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date"] := {=>}
+    hTool["inputSchema"]["properties"]["date"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date"]["description"] := "The base date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["value"] := {=>}
+    hTool["inputSchema"]["properties"]["value"]["type"] := "integer"
+    hTool["inputSchema"]["properties"]["value"]["description"] := "The number of days to subtract"
+    hTool["inputSchema"]["required"]:={"date","value"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_subtract_day",{|hParams|Agent_DateDiff():Execute("DateSubDay",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_subtract_month"
+    hTool["description"] := "Subtract a **specific number of months** from a given date."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date"] := {=>}
+    hTool["inputSchema"]["properties"]["date"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date"]["description"] := "The base date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["value"] := {=>}
+    hTool["inputSchema"]["properties"]["value"]["type"] := "integer"
+    hTool["inputSchema"]["properties"]["value"]["description"] := "The number of months to subtract"
+    hTool["inputSchema"]["required"]:={"date","value"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_subtract_month",{|hParams|Agent_DateDiff():Execute("DateSubMonth",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "date_subtract_year"
+    hTool["description"] := "Subtract a **specific number of years** from a given date."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["date"] := {=>}
+    hTool["inputSchema"]["properties"]["date"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["date"]["description"] := "The base date in ISO 8601 format"
+    hTool["inputSchema"]["properties"]["value"] := {=>}
+    hTool["inputSchema"]["properties"]["value"]["type"] := "integer"
+    hTool["inputSchema"]["properties"]["value"]["description"] := "The number of years to subtract"
+    hTool["inputSchema"]["required"]:={"date","value"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("date_subtract_year",{|hParams|Agent_DateDiff():Execute("DateSubYear",hParams)},hTool)
 
     return(oTAgent) as object
 

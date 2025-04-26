@@ -3,6 +3,39 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-26 14:26 UTC naldodj (hbmcp)
+  + src/mcp/stdio/go64.bat
+  + src/mcp/stdio/hbmcp.env
+  + src/mcp/stdio/hbmcp.exe
+  + src/mcp/stdio/hbmcp.hbp
+  + src/mcp/stdio/hbmcp.log
+  + src/mcp/stdio/hbmcp.prg
+  + src/mcp/stdio/libcrypto-3-x64.dll
+  + src/mcp/stdio/libcurl-x64.dll
+  + src/mcp/stdio/libmysql64.dll
+  + src/mcp/stdio/libssl-3-x64.dll
+  + src/mcp/stdio/stdio.code-workspace
+  + src/tst/libcrypto-3-x64.dll
+  + src/tst/libcurl-x64.dll
+  + src/tst/libmysql64.dll
+  + src/tst/libssl-3-x64.dll
+  * .gitignore
+  * src/agents/agent_filesystem.prg
+  * src/agents/agent_math.prg
+  * src/core/tagent.prg
+  * src/core/tllm.prg
+  * src/tst/hb_agents_lmstudio_curl_msvc.exe
+  * src/tst/hb_agents_lmstudio_msxml2_msvc.exe
+  * src/tst/hb_agents_lmstudio_tip_msvc.exe
+  * src/tst/hb_agents_lmstudio_winhttp_msvc.exe
+  * src/tst/hb_agents_ollama_curl_msvc.exe
+  * src/tst/hb_agents_ollama_msxml2_msvc.exe
+  * src/tst/hb_agents_ollama_tip_msvc.exe
+  * src/tst/hb_agents_ollama_winhttp_msvc.exe
+  * src/agents/agent_datediff.prg
+  * src/agents/agent_datetime.prg
+  * src/agents/hb_agents_list.prg
+
 2025-04-17 19:22 UTC naldodj (msvc)
   + src/tst/go64.bat
   + src/tst/hb_agents_lmstudio_curl_msvc.exe

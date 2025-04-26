@@ -1,9 +1,9 @@
 /*
                             _        __  _  _                         _
-  __ _   __ _   ___  _ __  | |_     / _|(_)| |  ___  ___  _   _  ___ | |_   ___  _ __ ___
- / _` | / _` | / _ \| '_ \ | __|   | |_ | || | / _ \/ __|| | | |/ __|| __| / _ \| '_ ` _ \
-| (_| || (_| ||  __/| | | || |_    |  _|| || ||  __/\__ \| |_| |\__ \| |_ |  __/| | | | | |
- \__,_| \__, | \___||_| |_| \__|   |_|  |_||_| \___||___/ \__,||___/ \__| \___||_| |_| |_|
+  __ _   __ _   ___  _ __  | |_     / _|(_)| |  ___  ___  _   _  ___ | |_   ___  _ __ ___
+ / _` | / _` | / _ \| '_ \ | __|   | |_ | || | / _ \/ __|| | | |/ __|| __| / _ \| '_ ` _ \
+| (_| || (_| ||  __/| | | || |_    |  _|| || ||  __/\__ \| |_| |\__ \| |_ |  __/| | | | | |
+ \__,_| \__, | \___||_| |_| \__|   |_|  |_||_| \___||___/ \__,||___/ \__| \___||_| |_| |_|
         |___/                                             |___/
 
 Ref.: FiveTech Software tech support forums
@@ -27,21 +27,19 @@ static function GetAgents()
     local cAgentPrompt as character
     local cAgentPurpose as character
 
-    local hParameters as hash
+    local hTool as hash
 
     #pragma __cstream|cAgentPrompt:=%s
-**Prompt:** Based on `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, select the correct tool from:
+**Prompt:** Based on '__PROMPT__' and the category '__AGENT_CATEGORY__', select the appropriate tool from:
 ```json
 __JSON_HTOOLS__
 ```
 ### Rules:
-### Rules:
-- Each tool has specific required parameters (e.g., `create_folder` → `folder_name`, `modify_file` → `file_name`, `content`).
+- Each tool requires specific parameters (e.g., `create_folder` → `folder_name`, `modify_file` → `file_name`, `content`).
 - Extract values from the prompt and match them exactly to the expected parameter names.
-- **Do not alter file paths. Keep them exactly as they appear in the prompt.**
-  - Preserve full file paths exactly as provided in the prompt.
-- Do **not** use a generic `"params"` object with arbitrary keys.
-- Only include the parameters defined by the tool (or return an empty object if none are needed).
+- **Do not alter file paths. Use them exactly as provided in the prompt.**
+- Do **not** use a generic "params" object with arbitrary keys.
+- Only include the parameters defined by the tool (or return an empty object if none are required).
 ### Output:
 Return only a JSON object:
 ```json
@@ -64,15 +62,64 @@ The "agent_filesystem" provides tools for performing basic file system operation
 
     oTAgent:=TAgent():New("Agent_FileSystem",cAgentPrompt,cAgentPurpose)
 
-    hParameters:={"params"=>["file_name"]}
-    oTAgent:aAddTool("create_file",{|hParams|Agent_FileSystem():Execute("CreateFile",hParams)},hParameters)
-    oTAgent:aAddTool("delete_file",{|hParams|Agent_FileSystem():Execute("DeleteFile",hParams)},hParameters)
+    hTool:={=>}
+    hTool["name"] := "create_file"
+    hTool["description"] := "Create a new file in the current directory or in a specified directory"
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["file_name"] := {=>}
+    hTool["inputSchema"]["properties"]["file_name"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["file_name"]["description"] := "The name of the file or full path to create"
+    hTool["inputSchema"]["required"]:={"file_name"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("create_file",{|hParams|Agent_FileSystem():Execute("CreateFile",hParams)},hTool)
 
-    hParameters:={"params"=>["file_name","content"]}
-    oTAgent:aAddTool("modify_file",{|hParams|Agent_FileSystem():Execute("ModifyFile",hParams)},hParameters)
+    hTool:={=>}
+    hTool["name"] := "delete_file"
+    hTool["description"] := "Delete a file in the current directory or in a specified directory"
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["file_name"] := {=>}
+    hTool["inputSchema"]["properties"]["file_name"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["file_name"]["description"] := "The name of the file or full path to delete"
+    hTool["inputSchema"]["required"]:={"file_name"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("delete_file",{|hParams|Agent_FileSystem():Execute("DeleteFile",hParams)},hTool)
 
-    hParameters:={"params"=>["folder_name"]}
-    oTAgent:aAddTool("create_folder",{|hParams|Agent_FileSystem():Execute("CreateFolder",hParams)},hParameters)
+    hTool:={=>}
+    hTool["name"] := "modify_file"
+    hTool["description"] := "Modify a file in the current directory or in a specified directory"
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["file_name"] := {=>}
+    hTool["inputSchema"]["properties"]["file_name"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["file_name"]["description"] := "The name of the file or full path to modify"
+    hTool["inputSchema"]["properties"]["content"] := {=>}
+    hTool["inputSchema"]["properties"]["content"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["content"]["description"] := "The content to write to the file"
+    hTool["inputSchema"]["required"]:={"file_name","content"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("modify_file",{|hParams|Agent_FileSystem():Execute("ModifyFile",hParams)},hTool)
+
+    hTool:={=>}
+    hTool["name"] := "create_folder"
+    hTool["description"] := "Create a folder in the current directory or in a specified subdirectory"
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["properties"]["folder_name"] := {=>}
+    hTool["inputSchema"]["properties"]["folder_name"]["type"] := "string"
+    hTool["inputSchema"]["properties"]["folder_name"]["description"] := "The name or path of the folder to create"
+    hTool["inputSchema"]["required"]:={"folder_name"}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("create_folder",{|hParams|Agent_FileSystem():Execute("CreateFolder",hParams)},hTool)
 
     return(oTAgent) as object
 

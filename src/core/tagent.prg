@@ -38,6 +38,6 @@ METHOD New(cCategory as character,cAgentPrompt as character,cAgentPurpose as cha
 
 METHOD aAddTool(cToolName as character,bToolAction as codeblock,hToolParameters as hash) CLASS TAgent
     cToolName:=Lower(allTrim(cToolName))
-    hb_Default(@hToolParameters,{"params"=>[""]})
-    self:hTools[cToolName]:={"action"=>bToolAction,"parameters"=>hToolParameters}
+    hToolParameters["name"]:=Lower(allTrim(hToolParameters["name"]))
+    self:hTools[cToolName]:={"action"=>bToolAction,"tool"=>hToolParameters}
     return(self)

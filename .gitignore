@@ -6,3 +6,7 @@ src/tst/test.txt
 *.bak
 /src/hb_httpconnector
 env_mk64.txt
+/src/.vscode
+/src/mcp/stdio/.vscode
+*.log
+*.code-workspace

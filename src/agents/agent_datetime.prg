@@ -26,6 +26,8 @@ static function GetAgents()
     local cAgentPrompt as character
     local cAgentPurpose as character
 
+    local hTool as hash
+
     #pragma __cstream|cAgentPrompt:=%s
 **Prompt:** Based on `'__PROMPT__'` and category `'__AGENT_CATEGORY__'`, select the best-matching tool from:
 ```json
@@ -61,9 +63,38 @@ The "agent_datetime" provides tools for retrieving the current date and time in 
 
     oTAgent:=TAgent():New("Agent_DateTime",cAgentPrompt,cAgentPurpose)
 
-    oTAgent:aAddTool("get_current_time",{|hParams|Agent_DateTime():Execute("GetCurrentTime",hParams)})
-    oTAgent:aAddTool("get_current_date",{|hParams|Agent_DateTime():Execute("GetCurrentDate",hParams)})
-    oTAgent:aAddTool("get_current_date_time",{|hParams|Agent_DateTime():Execute("GetCurrentDateTime",hParams)})
+    hTool:={=>}
+    hTool["name"] := "get_current_time"
+    hTool["description"] := "Retrieve the **current time** if the prompt refers to 'time' but not 'date'."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["required"] := {}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"] := "http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("get_current_time", {|hParams| Agent_DateTime():Execute("GetCurrentTime", hParams)}, hTool)
+
+    hTool:={=>}
+    hTool["name"] := "get_current_date"
+    hTool["description"] := "Retrieve the **current date** if the prompt refers to 'date' but not 'time'."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["required"] := {}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"] := "http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("get_current_date", {|hParams| Agent_DateTime():Execute("GetCurrentDate", hParams)}, hTool)
+
+    hTool:={=>}
+    hTool["name"] := "get_current_date_time"
+    hTool["description"] := "Retrieve the **current date and time** if the prompt refers to both 'date' and 'time'."
+    hTool["inputSchema"] := {=>}
+    hTool["inputSchema"]["type"] := "object"
+    hTool["inputSchema"]["properties"] := {=>}
+    hTool["inputSchema"]["required"] := {}
+    hTool["inputSchema"]["additionalProperties"] := .F.
+    hTool["$schema"] := "http://json-schema.org/draft-07/schema#"
+    oTAgent:aAddTool("get_current_date_time", {|hParams| Agent_DateTime():Execute("GetCurrentDateTime", hParams)}, hTool)
 
     return(oTAgent)
 
