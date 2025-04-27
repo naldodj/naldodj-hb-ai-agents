@@ -29,7 +29,11 @@ procedure Main()
     local cInput as character
     local cResponse as character
 
+    local hAgents as hash
+
     ErrorBlock({|oError|LogFile("error: ",hb_JSONEncode(hb_DumpVar(oError,.T.,nil)))})
+
+    hAgents:=hb_agents():Execute("GetAgents")
 
     while (.T.)
 
@@ -40,7 +44,7 @@ procedure Main()
 
         // Process the message
         LogFile("in: ",cInput)
-        cResponse:=ProcessMessage(cInput)
+        cResponse:=ProcessMessage(cInput,hAgents)
         if (!Empty(cResponse))
             LogFile("out: ",cResponse)
             StdOut(cResponse)
@@ -53,7 +57,7 @@ procedure Main()
     return
 
 // Function to process JSON-RPC messages
-static function ProcessMessage(cInput as character)
+static function ProcessMessage(cInput as character,hAgents as hash)
 
     local aTools as array
 
@@ -68,7 +72,6 @@ static function ProcessMessage(cInput as character)
     local hTool as hash
     local hJSON as hash
     local hAgent as hash
-    local hAgents as hash
     local hResult as hash
     local hResponse as hash
 
@@ -176,7 +179,6 @@ static function ProcessMessage(cInput as character)
             hTool["$schema"]:="http://json-schema.org/draft-07/schema#"
             aAdd(aTools,hTool)
 
-            hAgents:=hb_agents():Execute("GetAgents")
             for each hAgent in hAgents
                 oTAgent:=hAgent:__enumValue():Eval("GetAgents")
                 for each cKey in hb_HKeys(oTAgent:hTools)
@@ -197,87 +199,96 @@ static function ProcessMessage(cInput as character)
             hResponse["jsonrpc"]:="2.0"
             hResponse["id"]:=nId
 
-            if (cToolName=="get_time")
+            switch (cToolName)
 
-                hResult:={;
-                    "content" => {;
-                        {;
-                            "type" => "text",;
-                            "text" => Time();
-                        };
-                    };
-                }
+                case "get_time"
 
-            elseif (cToolName=="hb_version")
-
-                hResult:={;
-                    "content" => {;
-                        {;
-                            "type" => "text",;
-                            "text" => hb_version();
-                        };
-                    };
-                }
-
-            elseif (cToolName=="hb_compiler")
-
-                hResult:={;
-                    "content" => {;
-                        {;
-                            "type" => "text",;
-                            "text" => hb_compiler();
-                        };
-                    };
-                }
-
-            elseif (cToolName=="hb_macro")
-
-                // New tool: execute macro and return result as string
-                // Verify that the "code" parameter exists and is a string
-                if (;
-                    hb_HHasKey(hJSON["params"],"arguments");
-                    .and.;
-                    hb_HHasKey(hJSON["params"]["arguments"],"code");
-                    .and.;
-                    ValType(hJSON["params"]["arguments"]["code"])=="C";
-                )
-
-                    cCode:=hJSON["params"]["arguments"]["code"]
-                    // Execute the macro and convert the result to string
-                    BEGIN SEQUENCE
-                        xResult:=&(cCode)
-                        cResult:=hb_ValToExp(xResult)
-                        hResult:={;
-                            "content" => {;
-                                {;
-                                    "type" => "text",;
-                                    "text" => cResult;
-                                };
-                            };
-                        }
-                    RECOVER
-                        // In case of macro error, return a JSON-RPC error
-                        hResult:={;
-                            "error" => {;
-                                "code" => -32602,;
-                                "message" => "Invalid macro expression";
-                            };
-                        }
-                    END SEQUENCE
-                else
-                    // Error: "code" parameter not provided or invalid
                     hResult:={;
-                        "error" => {;
-                            "code" => -32604,;
-                            "message" => "Missing or invalid code parameter";
+                        "content" => {;
+                            {;
+                                "type" => "text",;
+                                "text" => Time();
+                            };
                         };
                     }
-                endif
 
-            else
+                    exit
+
+                case "hb_version"
+
+                    hResult:={;
+                        "content" => {;
+                            {;
+                                "type" => "text",;
+                                "text" => hb_version();
+                            };
+                        };
+                    }
+
+                    exit
+
+                case "hb_compiler"
+
+                    hResult:={;
+                        "content" => {;
+                            {;
+                                "type" => "text",;
+                                "text" => hb_compiler();
+                            };
+                        };
+                    }
+
+                    exit
+
+                case "hb_macro"
+
+                    // New tool: execute macro and return result as string
+                    // Verify that the "code" parameter exists and is a string
+                    if (;
+                        hb_HHasKey(hJSON["params"],"arguments");
+                        .and.;
+                        hb_HHasKey(hJSON["params"]["arguments"],"code");
+                        .and.;
+                        ValType(hJSON["params"]["arguments"]["code"])=="C";
+                    )
+
+                        cCode:=hJSON["params"]["arguments"]["code"]
+                        // Execute the macro and convert the result to string
+                        BEGIN SEQUENCE
+                            xResult:=&(cCode)
+                            cResult:=hb_ValToExp(xResult)
+                            hResult:={;
+                                "content" => {;
+                                    {;
+                                        "type" => "text",;
+                                        "text" => cResult;
+                                    };
+                                };
+                            }
+                        RECOVER
+                            // In case of macro error, return a JSON-RPC error
+                            hResult:={;
+                                "error" => {;
+                                    "code" => -32602,;
+                                    "message" => "Invalid macro expression";
+                                };
+                            }
+                        END SEQUENCE
+                    else
+                        // Error: "code" parameter not provided or invalid
+                        hResult:={;
+                            "error" => {;
+                                "code" => -32604,;
+                                "message" => "Missing or invalid code parameter";
+                            };
+                        }
+                    endif
+
+                    exit
+
+            otherwise
 
                 BEGIN SEQUENCE
-                    hAgents:=hb_agents():Execute("GetAgents") as hash
                     for each hAgent in hAgents
                         oTAgent:=hAgent:__enumValue():Eval("GetAgents")
                         for each cKey in hb_HKeys(oTAgent:hTools)
@@ -297,7 +308,7 @@ static function ProcessMessage(cInput as character)
                     next each //hAgent
                 END SEQUENCE
 
-            endif
+            end switch
 
             exit
 

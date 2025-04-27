@@ -3,6 +3,10 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-27 07:19 UTC naldodj (hbmcp)
+  * src/mcp/stdio/hbmcp.exe
+  * src/mcp/stdio/hbmcp.prg
+
 2025-04-26 15:10 UTC naldodj (hbmcp)
   - src/mcp/stdio/hbmcp.log
   * src/agents/agent_math.prg
