@@ -82,7 +82,7 @@ static function ProcessMessage(cInput as character,hAgents as hash)
     local xResult as anytype
 
     // Decode JSON to obtain the method and ID
-    hb_jsonDecode(cInput,@hJSON)
+    hb_JSONDecode(cInput,@hJSON)
     cMethod:=Lower(allTrim(hJSON["method"]))
 
     LogFile("method: ",cMethod)
@@ -183,7 +183,7 @@ static function ProcessMessage(cInput as character,hAgents as hash)
                 oTAgent:=hAgent:__enumValue():Eval("GetAgents")
                 for each cKey in hb_HKeys(oTAgent:hTools)
                     aAdd(aTools,oTAgent:hTools[cKey]["tool"])
-                next each //hTool
+                next each //cKey
             next each //hAgent
 
             // Build the result
@@ -324,7 +324,7 @@ static function ProcessMessage(cInput as character,hAgents as hash)
     end switch
 
     hResponse["result"]:=hResult
-    cResponse:=hb_JsonEncode(hResponse)+hb_eol()
+    cResponse:=hb_JSONEncode(hResponse)+hb_eol()
 
     return(cResponse) as character
 
@@ -356,7 +356,7 @@ static function LogFile(cKey as character,cValue as character)
 
     #include <hbapi.h>
 
-    HB_FUNC_STATIC( STDIN)
+    HB_FUNC_STATIC(STDIN)
     {
         char buffer[1024];
 
@@ -374,7 +374,7 @@ static function LogFile(cKey as character,cValue as character)
         }
     }
 
-    HB_FUNC_STATIC( STDOUT)
+    HB_FUNC_STATIC(STDOUT)
     {
         if (HB_ISCHAR(1))
         {

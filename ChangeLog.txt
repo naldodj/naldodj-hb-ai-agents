@@ -3,6 +3,15 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-27 08:34 UTC naldodj (hbmcp)
+  + src/mcp/stdio/hbmcp_cygwin_gcc.exe
+  + src/mcp/stdio/compile.sh
+  * src/mcp/stdio/go64.bat
+  * src/mcp/stdio/hbmcp.prg
+  * src/mcp/stdio/stdio.code-workspace
+  * src/mcp/stdio/hbmcp.hbp
+  * src/mcp/stdio/hbmcp.exe -> src/mcp/stdio/hbmcp_win_msvc64.exe
+
 2025-04-27 07:19 UTC naldodj (hbmcp)
   * src/mcp/stdio/hbmcp.exe
   * src/mcp/stdio/hbmcp.prg

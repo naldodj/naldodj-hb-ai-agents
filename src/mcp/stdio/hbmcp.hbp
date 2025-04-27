@@ -4,23 +4,24 @@
 @../../tst/hb_core_agents.hbp
 
 -lgdiplus
--lole32
--lOleDlg
+{win}-lole32
+{win}-lOleDlg
 -lversion
--lucrt
+{win}-lucrt
 -luxtheme
 
 xhb.hbc
 hbct.hbc
+hbtip.hbc
 hbcurl.hbc
-hbwin.hbc
+{win}hbwin.hbc
 hbmzip.hbc
 hbziparc.hbc
 hbfoxpro.hbc
 
--ldflag=/NODEFAULTLIB:msvcrt
--ldflag+=/NODEFAULTLIB:libucrt
+{win}-ldflag=/NODEFAULTLIB:msvcrt
+{win}-ldflag+=/NODEFAULTLIB:libucrt
 
 hbmcp.prg
 
--o./${hb_name}
+-o./${hb_name}_${hb_plat}_${hb_comp}

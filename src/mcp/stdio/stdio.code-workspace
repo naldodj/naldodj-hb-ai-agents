@@ -23,13 +23,22 @@
     "mcp": {
         "inputs": [],
         "servers": {
-            "hbmcp": {
+            "hbmcp_win_msvc64": {
                 "type": "stdio",
-                "command": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp.exe",
+                "command": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp_win_msvc64.exe",
                 "args": [
                 ],
                 "env": {
-                    "MCP_LOGFILE": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp.log"
+                    "MCP_LOGFILE": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp_win_msvc64.log"
+                }
+            },
+            "hbmcp_cygwin_gcc": {
+                "type": "stdio",
+                "command": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp_cygwin_gcc.exe",
+                "args": [
+                ],
+                "env": {
+                    "MCP_LOGFILE": "C:\\GitHub\\naldodj-hb-ai-agents\\src\\mcp\\stdio\\hbmcp_cygwin_gcc.log"
                 }
             }
         }
