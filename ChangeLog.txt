@@ -3,6 +3,15 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-04-29 08:40 UTC naldodj (hbmcp)
+  * src/mcp/stdio/hbmcp.hbp
+  * src/mcp/stdio/hbmcp_cygwin_gcc.exe -> src/mcp/stdio/gcc/hbmcp_cygwin_gcc.exe
+  * src/mcp/stdio/hbmcp_win_msvc64.exe -> src/mcp/stdio/msvc64/hbmcp_win_msvc64.exe
+  * src/mcp/stdio/libcrypto-3-x64.dll -> src/mcp/stdio/msvc64/libcrypto-3-x64.dll
+  * src/mcp/stdio/libcurl-x64.dll -> src/mcp/stdio/msvc64/libcurl-x64.dll
+  * src/mcp/stdio/libmysql64.dll -> src/mcp/stdio/msvc64/libmysql64.dll
+  * src/mcp/stdio/libssl-3-x64.dll -> src/mcp/stdio/msvc64/libssl-3-x64.dll
+
 2025-04-27 08:34 UTC naldodj (hbmcp)
   + src/mcp/stdio/hbmcp_cygwin_gcc.exe
   + src/mcp/stdio/compile.sh

@@ -24,4 +24,4 @@ hbfoxpro.hbc
 
 hbmcp.prg
 
--o./${hb_name}_${hb_plat}_${hb_comp}
+-o./${hb_comp}/${hb_name}_${hb_plat}_${hb_comp}
