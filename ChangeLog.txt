@@ -3,6 +3,9 @@
    Entries may not always be in chronological/commit order.
    See license at the end of file. */
 
+2025-05-11 22:45 UTC naldodj (go64.bat)
+  * src/tst/go64.bat
+
 2025-04-29 08:40 UTC naldodj (hbmcp)
   * src/mcp/stdio/hbmcp.hbp
   * src/mcp/stdio/hbmcp_cygwin_gcc.exe -> src/mcp/stdio/gcc/hbmcp_cygwin_gcc.exe
